@@ -21,6 +21,13 @@ include $(base_dir)/variables.mk
 #########################################################################################
 sim_name = verilator
 
+# By default build chisel3/firrtl and other subprojects from source
+# Workaround: Specify a firrtl version in system properties so that Treadle uses a
+# compatible version of FIRRTL and not 1.5-SNAPSHOT (which is the default
+# specified in it's build.sbt, and is not overridden by Chipyard's build.sbt)
+override SBT_OPTS += -DfirrtlVersion=1.4.1 -Dsbt.sourcemode=true -Dsbt.workspace=$(base_dir)/tools
+
+
 #########################################################################################
 # verilator simulator types and rules
 #########################################################################################

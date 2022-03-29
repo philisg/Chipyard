@@ -274,6 +274,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is(m_read){
+      // busy            :=  Bool(true)
       io.mem_req_val  := Bool(true)
       io.mem_req_addr := ("h3f".U << 32) | memory_addr(i) //address from CGRA is only 32-bit
       io.mem_req_tag  := i
@@ -286,12 +287,14 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
     is(m_wait){
       when(io.mem_resp_val && io.mem_resp_tag === i){
+        // busy                    :=  Bool(true)
         data_from_memory(i)     := io.mem_resp_data
         mem_s                   := m_idle
         // cgra_clock_en           := Bool(true)
       }
     }
     is(m_write){
+      // busy            :=  Bool(true)
       io.mem_req_val  := Bool(true)
       io.mem_req_addr := ("h3f".U << 32) | memory_addr(i)
       io.mem_req_tag  := i
