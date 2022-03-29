@@ -119,6 +119,13 @@ class Sha3RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: Sha3Rocket
 
+// DOC include start: CgrameRocket
+class CgrameRocketConfig extends Config(
+  new cgrame.WithCgrameAccel ++				    // add cgrame
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: CgrameRocket
+
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero

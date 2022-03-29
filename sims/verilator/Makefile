@@ -134,8 +134,10 @@ VERILOG_IP_VERILATOR_FLAGS := \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
 	-Wno-style \
+	-I"/lhome/philisg/chipyard/generators/cgrame/src/main/resources/" \
 	-Wall
 
+# ADDED THE TIMESCALEMOD WARNING LINE AND INCLUDE PATH!!!!!!!!!!
 # normal flags used for chipyard builds (that are incompatible with vlog ip aka cva6/NVDLA)
 CHIPYARD_VERILATOR_FLAGS := \
 	--assert
@@ -163,6 +165,7 @@ VERILATOR_NONCC_OPTS = \
 	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
 	-Wno-fatal \
+        -I"/lhome/philisg/chipyard/generators/cgrame/src/main/resources/" \
 	$(TIMESCALE_OPTS) \
 	$(MAX_WIDTH_OPTS) \
 	$(PREPROC_DEFINES) \
@@ -171,6 +174,7 @@ VERILATOR_NONCC_OPTS = \
 	-f $(sim_common_files) \
 	$(sim_vsrcs)
 
+# ADDED TIMESCALEMOD WARNIGN REMOVAL AND INCLUDE SEARCH PATH !!!!!
 #----------------------------------------------------------------------------------------
 # gcc configuration/optimization
 #----------------------------------------------------------------------------------------

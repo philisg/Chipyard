@@ -186,7 +186,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor)
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, cgrame)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -229,6 +229,12 @@ lazy val sha3 = (project in file("generators/sha3"))
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 
+lazy val cgrame = (project in file("generators/cgrame"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
 lazy val gemmini = (project in file("generators/gemmini"))
   .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip, chisel_testers)
@@ -248,7 +254,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard) // must depend on chipyard to get scala resources
+  .dependsOn(chisel_testers, chipyard, cgrame) // must depend on chipyard to get scala resources
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 
