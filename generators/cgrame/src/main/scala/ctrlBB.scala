@@ -90,7 +90,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val state   = Reg(init = s_idle)
 
   //memory handler
-  val m_idle :: m_preRead :: m_read :: m_wait :: m_write :: Nil = Enum(UInt(), 5)
+  val m_idle :: m_preRead :: m_read :: m_wait :: m_read_CGRA :: m_wait_CGRA :: m_write_CGRA :: Nil = Enum(UInt(), 7)
   val mem_s = Reg(init=m_idle)
 
   val rs1_addr          = Reg(init = UInt(0,64))
@@ -98,6 +98,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val rd_addr           = Reg(init = UInt(0,64))
   val addr_buffer       = Reg(init = Vec.fill(3) { 0.U(64.W) })
   val data_len          = Reg(init = Vec.fill(3) { 0.U(64.W) })
+  val data              = Reg(init = Vec.fill(3) { 0.U(64.W) })
   val busy              = Reg(init = Bool(false))
   val interrupt         = Reg(init = Bool(false))
   val rocc_req_val_reg  = Reg(next = io.rocc_req_val)
@@ -134,6 +135,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   // io.Config_Clock     := Mux(config_clk_en, clock, Bool(false))
   // configLen           := 847
   io.rocc_req_rdy       := Bool(false)
+  io.rocc_resp_val      := Bool(false)
   io.interrupt          := Bool(false)                                                                                                                      
   io.busy               := busy
   io.mem_req_val        := Bool(false)
@@ -168,13 +170,13 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   memory_addr(3)        := io.addr3
   clock_reg             := !clock_reg
   io.Config_Clock       := Mux(config_clock_en, clock_reg, Bool(false))
-  io.CGRA_Clock         := Mux(cgra_clock_en  , clock_reg, Bool(false))
+  io.CGRA_Clock         := Mux(cgra_clock_en  , clock.asBool, Bool(false))
 
   /* instruction			roccinst	src2		    src1	      dst	  custom-N
-  configure			      2					-	          config	    -	    0
-  one input&output	  2			    src2(O)		  src1(I)	    -	    1
-  input #2			      2					src1(I)		  -           -     2 (Used when we have two inputs)
-  input length #1|#2	2			    src2(lenI2)	src1(lenI1)	-     3
+  configure			      0					-	          config	    -	    0
+  one input&output	  0			    src2(O)		  src1(I)	    -	    1
+  input #2			      0					src1(I)		  -           -     2 (Used when we have two inputs)
+  input length #1|#2	0			    src2(lenI2)	src1(lenI1)	-     3
 
   * configure: configure the CGRA with a mapping (`busy` while configuring)
   * one input: when the configuration demands a single input (pointer)
@@ -197,14 +199,17 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
           busy                        := Bool(false)
           received_vec                := received_vec + 2
           when(received_vec===UInt(12)){
-            state := s_CGRA_config
-            busy  := Bool(true)
+            state         := s_CGRA_config
+            busy          := Bool(true)
+            received_vec  := 0
+            io.rocc_resp_val  := Bool(true)
           }
         }.elsewhen(io.rocc_funct === UInt(1)){ //output/input 
           io.rocc_req_rdy                 := Bool(true)
-          addr_buffer(0)                  := io.rocc_rs1
-          addr_buffer(2)                  := io.rocc_rs2
-          busy                            := Bool(false)
+          memory_addr(0)                  := io.rocc_rs1 
+          addr_buffer(2)                  := io.rocc_rs2 
+          busy                            := Bool(true)
+          // mem_s                           := m_read
         }.elsewhen(io.rocc_funct === UInt(2)){ //input#2
           io.rocc_req_rdy                 := Bool(true)
           busy                            := Bool(false)
@@ -242,7 +247,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is{s_finished}{
-      busy              := Bool(false)
+      // busy              := Bool(false)
       io.rocc_resp_val  := Bool(false)
       // cgra_clock_en   := Bool(false)
       rocc_s            := r_idle
@@ -256,11 +261,12 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       when(state =/= s_CGRA_config){// Should not fetch when configuring cgra
         //Check if we want to write, that there is a new write and that address is within range
         when((write_rq_vec(i) === Bool(true)) && (last_write_address(i) =/= memory_addr(i)) && (memory_addr(i) > "hffff0000".U)){ 
-          mem_s           := m_write
+          mem_s           := m_write_CGRA
 
         //Since not write, we want to read, chack that there is a new read and that it is whitin the memory range
         }.elsewhen(last_read_address(i) =/= memory_addr(i) && (memory_addr(i) > "hffff0000".U)){
           mem_s           := m_read
+          busy            := Bool(true)
           // cgra_clock_en   := Bool(false)
 
         }.otherwise{
@@ -274,27 +280,43 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is(m_read){
-      // busy            :=  Bool(true)
+      io.mem_req_val  := Bool(true)
+      io.mem_req_addr := memory_addr(0)
+      io.mem_req_tag  := 4
+      io.mem_req_cmd  := M_XRD
+      io.mem_req_size := log2Ceil(64).U
+      when(io.mem_req_rdy && io.mem_req_val){
+        mem_s         := m_wait
+      }
+    }
+    is(m_wait){
+      when(io.mem_resp_val && io.mem_resp_tag === 4){
+        busy          := Bool(false)
+        data(0)       := io.mem_resp_data
+        mem_s         := m_idle
+      }
+    }
+    is(m_read_CGRA){
       io.mem_req_val  := Bool(true)
       io.mem_req_addr := ("h3f".U << 32) | memory_addr(i) //address from CGRA is only 32-bit
       io.mem_req_tag  := i
       io.mem_req_cmd  := M_XRD
       io.mem_req_size := log2Ceil(64).U
       when(io.mem_req_rdy && io.mem_req_val){
-        mem_s                 := m_wait
+        mem_s                 := m_wait_CGRA
         last_read_address(i)  := memory_addr(i)
       }
     }
-    is(m_wait){
+    is(m_wait_CGRA){
       when(io.mem_resp_val && io.mem_resp_tag === i){
-        // busy                    :=  Bool(true)
+        busy                    := Bool(false)
         data_from_memory(i)     := io.mem_resp_data
         mem_s                   := m_idle
         // cgra_clock_en           := Bool(true)
       }
     }
-    is(m_write){
-      // busy            :=  Bool(true)
+    is(m_write_CGRA){
+      busy            := Bool(true)
       io.mem_req_val  := Bool(true)
       io.mem_req_addr := ("h3f".U << 32) | memory_addr(i)
       io.mem_req_tag  := i
@@ -306,8 +328,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       when(io.mem_resp_val && io.mem_resp_tag === i){
         mem_s             := m_idle
         cgra_clock_en     := Bool(true)
+        busy              := Bool(false)
       }.otherwise{
-        mem_s             := m_write
+        mem_s             := m_write_CGRA
       }
     }
   } //end mem_s
@@ -322,20 +345,20 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   //     }
   //   }
   //   is(m_preRead){
-  //     mem_s           := m_write      
+  //     mem_s           := m_write_CGRA      
   //   }
-  //   is(m_write){
+  //   is(m_write_CGRA){
   //     when(io.cgra_Outconfig){
   //       data_from_cgra(0) := io.from_cgra0
   //       data_from_cgra(1) := io.from_cgra1
   //       data_from_cgra(2) := io.from_cgra2
   //       data_from_cgra(3) := io.from_cgra3
-  //       mem_s             := m_read
+  //       mem_s             := m_read_CGRA
   //     }.otherwise{
-  //       mem_s             := m_write
+  //       mem_s             := m_write_CGRA
   //     }
   //   }
-  //   is(m_read){
+  //   is(m_read_CGRA){
   //     when(state =/= s_write){
   //       io.mem_req_val  := !data_valid(i)
   //       io.mem_req_addr := addr_buffer(i)
@@ -345,15 +368,15 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
   //       when(io.mem_req_rdy && io.mem_req_val){
   //         i       := i + 1
-  //         mem_s   := m_wait
+  //         mem_s   := m_wait_CGRA
   //       }.otherwise{
-  //         mem_s   := m_read
+  //         mem_s   := m_read_CGRA
   //       }
   //     }.otherwise{
-  //       mem_s := m_read
+  //       mem_s := m_read_CGRA
   //     }
   //   }
-  //   is(m_wait){
+  //   is(m_wait_CGRA){
   //     when(io.mem_resp_val){
   //       data_buffer(io.mem_resp_tag)  := io.mem_resp_data
   //       data_valid(io.mem_resp_tag)   := Bool(true)
@@ -362,7 +385,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   //         mem_s       := m_idle
   //         i           := 0
   //       }.otherwise{
-  //         mem_s       := m_read
+  //         mem_s       := m_read_CGRA
   //       }
   //     }
   //   }
