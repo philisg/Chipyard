@@ -7,14 +7,14 @@ import rocket._
 //import cde._
 import cde.{Parameters, Field, Config, Knob, Dump, World, Ex, ViewSym}
 import cde.Implicits._
-import cgrame._
+import cgra2x2._
 
 //case object Width extends Field[Int]
 //case object Stages extends Field[Int]
 //case object FastMem extends Field[Boolean]
 //case object BufferSram extends Field[Boolean]
 
-class CgrameConfig extends Config {
+class Cgra2x2Config extends Config {
   override val topDefinitions:World.TopDefs = {
     (pname,site,here) => pname match {
       case WidthP => 64
@@ -25,7 +25,7 @@ class CgrameConfig extends Config {
       case BuildRoCC => Seq( 
                           RoccParameters(    
                             opcodes = OpcodeSet.custom0,
-                            generator = (p: Parameters) => (Module(new CgrameAccel()(p.alterPartial({ case CoreName => "Rocket" })))) ))
+                            generator = (p: Parameters) => (Module(new Cgra2x2Accel()(p.alterPartial({ case CoreName => "Rocket" })))) ))
     }
   }
  
@@ -44,6 +44,6 @@ class CgrameConfig extends Config {
   }
 }
 
-class CgrameVLSIConfig extends Config(new CgrameConfig ++ new DefaultVLSIConfig)
-class CgrameFPGAConfig extends Config(new CgrameConfig ++ new DefaultFPGAConfig) 
-class CgrameCPPConfig extends Config(new CgrameConfig ++ new DefaultCPPConfig) 
+class Cgra2x2VLSIConfig extends Config(new Cgra2x2Config ++ new DefaultVLSIConfig)
+class Cgra2x2FPGAConfig extends Config(new Cgra2x2Config ++ new DefaultFPGAConfig) 
+class Cgra2x2CPPConfig extends Config(new Cgra2x2Config ++ new DefaultCPPConfig) 

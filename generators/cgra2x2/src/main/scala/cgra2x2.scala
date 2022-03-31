@@ -1,4 +1,4 @@
-package cgrame
+package cgra2x2
 
 import Chisel._
 import chisel3.util.{HasBlackBoxResource}
@@ -8,22 +8,22 @@ import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
 import freechips.rocketchip.rocket.{TLBConfig, HellaCacheReq}
 
-case object CgrameWidthP extends Field[Int]
-case object CgrameStages extends Field[Int]
-case object CgrameFastMem extends Field[Boolean]
-case object CgrameBufferSram extends Field[Boolean]
+case object Cgra2x2WidthP extends Field[Int]
+case object Cgra2x2Stages extends Field[Int]
+case object Cgra2x2FastMem extends Field[Boolean]
+case object Cgra2x2BufferSram extends Field[Boolean]
 
 /*
  * Use a Blackbox verilog version of the CGRA-ME accelerator
  */
-case object CgrameBlackBox extends Field[Boolean](false)
+case object Cgra2x2BlackBox extends Field[Boolean](false)
 
 // Lasse: examples on how to implement RoCC interfaces:
 // /generators/rocket-chip/src/main/scala/tile/LazyRoCC.scala
 
 // A BlackBox wrapper.
 // All we do is expose the Verilog io.
-class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxResource{
+class Cgra2x2BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxResource{
   val io = IO(new Bundle {
 	  val Config_Clock = Input(Bool())
 	  val Config_Reset = Input(Bool())
@@ -38,12 +38,8 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
       // Chisel Analog => Verilog inout
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
-    val dataIn2   = Input(UInt(32.W))
-    val dataIn3   = Input(UInt(32.W))
     val dataOut0  = Output(UInt(32.W))
     val dataOut1  = Output(UInt(32.W))
-    val dataOut2  = Output(UInt(32.W))
-    val dataOut3  = Output(UInt(32.W))
 
     val write_rq0 = Output(Bool())
     val from_mem0 = Input(UInt(32.W))
@@ -54,20 +50,10 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
     val from_mem1 = Input(UInt(32.W))
     val to_mem1   = Output(UInt(32.W))
     val addr1     = Output(UInt(32.W))
-    
-    val write_rq2 = Output(Bool())
-    val from_mem2 = Input(UInt(32.W))
-    val to_mem2   = Output(UInt(32.W))
-    val addr2     = Output(UInt(32.W))
-    
-    val write_rq3 = Output(Bool())
-    val from_mem3 = Input(UInt(32.W))
-    val to_mem3   = Output(UInt(32.W))
-    val addr3     = Output(UInt(32.W))
   })
 
   // Lots of files. The examples have monolithic files.
-  addResource("/CgrameBlackBox.v")
+  addResource("/Cgra2x2BlackBox.v")
   addResource("/adres_5in_vliw.v")
   addResource("/adres_6in_vliw.v")
   addResource("/const_32b.v")
@@ -75,7 +61,7 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
   addResource("/ConfigCell.v")
   addResource("/io_32b.v")
   // addResource("/memUnit_32b.v")
-  addResource("/memoryPort_4connect_32b.v")
+  addResource("/memoryPort_2connect_32b.v")
   addResource("/mux_2to1_32b.v")
   addResource("/mux_4to1_32b.v")
   addResource("/mux_5to1_32b.v")
@@ -93,19 +79,19 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
   addResource("/op_sub_32b.v")
   addResource("/op_xor_32b.v")
   addResource("/registerFile_1in_2out_32b.v")
-  addResource("/registerFile_4in_8out_32b.v")
+  addResource("/registerFile_2in_4out_32b.v")
   addResource("/register_32b.v")
   addResource("/tristate_32b.v")
 }
 
-class CgrameAccel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(
+class Cgra2x2Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(
     opcodes = opcodes, nPTWPorts = 0) {
-    override lazy val module = new CgrameAccelImp(this)
+    override lazy val module = new Cgra2x2AccelImp(this)
 }
 
-class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer){
+class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer){
   
-  val cgramebb    = Module(new CgrameBlackBox)
+  val cgra2x2bb    = Module(new Cgra2x2BlackBox)
   val ctrl        = Module(new CtrlBBModule)
   val cmd         = Queue(io.cmd) //Trengs denne?
 
@@ -124,38 +110,26 @@ class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoC
   io.interrupt          <> ctrl.io.interrupt     
 
   //CGRA IO
-  cgramebb.io.CGRA_Clock    := clock
-  // cgramebb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
-  cgramebb.io.Config_Clock  := ctrl.io.Config_Clock
-  cgramebb.io.CGRA_Reset    := reset
-  cgramebb.io.Config_Reset  := ctrl.io.Config_Reset
-  cgramebb.io.ConfigIn      := ctrl.io.cgra_Inconfig
-  ctrl.io.cgra_Outconfig    := cgramebb.io.ConfigOut
-  ctrl.io.from_cgra0        <> cgramebb.io.dataOut0
-  ctrl.io.from_cgra1        <> cgramebb.io.dataOut1
-  ctrl.io.from_cgra2        <> cgramebb.io.dataOut2
-  ctrl.io.from_cgra3        <> cgramebb.io.dataOut3
-  cgramebb.io.dataIn0       := ctrl.io.to_cgra0
-  cgramebb.io.dataIn1       := ctrl.io.to_cgra1
-  cgramebb.io.dataIn2       := ctrl.io.to_cgra2
-  cgramebb.io.dataIn3       := ctrl.io.to_cgra3
+  cgra2x2bb.io.CGRA_Clock     := clock
+  // cgra2x2bb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
+  cgra2x2bb.io.Config_Clock   := ctrl.io.Config_Clock
+  cgra2x2bb.io.CGRA_Reset     := reset
+  cgra2x2bb.io.Config_Reset   := ctrl.io.Config_Reset
+  cgra2x2bb.io.ConfigIn       := ctrl.io.cgra_Inconfig
+  ctrl.io.cgra_Outconfig      := cgra2x2bb.io.ConfigOut
+  ctrl.io.from_cgra0          <> cgra2x2bb.io.dataOut0
+  ctrl.io.from_cgra1          <> cgra2x2bb.io.dataOut1
+  cgra2x2bb.io.dataIn0        := ctrl.io.to_cgra0
+  cgra2x2bb.io.dataIn1        := ctrl.io.to_cgra1
 
-  ctrl.io.write_rq0     := cgramebb.io.write_rq0
-  ctrl.io.write_rq1     := cgramebb.io.write_rq1
-  ctrl.io.write_rq2     := cgramebb.io.write_rq2
-  ctrl.io.write_rq3     := cgramebb.io.write_rq3
-  ctrl.io.to_mem0       := cgramebb.io.to_mem0
-  ctrl.io.to_mem1       := cgramebb.io.to_mem1
-  ctrl.io.to_mem2       := cgramebb.io.to_mem2
-  ctrl.io.to_mem3       := cgramebb.io.to_mem3
-  ctrl.io.addr0         := cgramebb.io.addr0
-  ctrl.io.addr1         := cgramebb.io.addr1
-  ctrl.io.addr2         := cgramebb.io.addr2
-  ctrl.io.addr3         := cgramebb.io.addr3
-  cgramebb.io.from_mem0 := ctrl.io.from_mem0
-  cgramebb.io.from_mem1 := ctrl.io.from_mem1
-  cgramebb.io.from_mem2 := ctrl.io.from_mem2
-  cgramebb.io.from_mem3 := ctrl.io.from_mem3
+  ctrl.io.write_rq0       := cgra2x2bb.io.write_rq0
+  ctrl.io.write_rq1       := cgra2x2bb.io.write_rq1
+  ctrl.io.to_mem0         := cgra2x2bb.io.to_mem0
+  ctrl.io.to_mem1         := cgra2x2bb.io.to_mem1
+  ctrl.io.addr0           := cgra2x2bb.io.addr0
+  ctrl.io.addr1           := cgra2x2bb.io.addr1
+  cgra2x2bb.io.from_mem0  := ctrl.io.from_mem0
+  cgra2x2bb.io.from_mem1  := ctrl.io.from_mem1
 
   //Memory
   def mem_ctrl(req: DecoupledIO[HellaCacheReq]){
@@ -176,17 +150,17 @@ class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoC
   ctrl.io.mem_resp_data := io.mem.resp.bits.data
 }
 
-class WithCgrameAccel extends Config ((site, here, up) =>{
-    case CgrameBlackBox => true
+class WithCgra2x2Accel extends Config ((site, here, up) =>{
+    case Cgra2x2BlackBox => true
     case BuildRoCC      => up(BuildRoCC) ++ Seq(
     (p: Parameters) => {
-      val cgrame = LazyModule.apply(new CgrameAccel(OpcodeSet.custom0)(p))
-      cgrame
+      val cgra2x2 = LazyModule.apply(new Cgra2x2Accel(OpcodeSet.custom0)(p))
+      cgra2x2
     }
   )
 })
 
-class WithCgrameBlackBox extends Config((site, here, up) => {
-  case CgrameBlackBox => true
-  // case CgrameTLB => None // Do not use the more correct DmemModule when blackboxing
+class WithCgra2x2BlackBox extends Config((site, here, up) => {
+  case Cgra2x2BlackBox => true
+  // case Cgra2x2TLB => None // Do not use the more correct DmemModule when blackboxing
 }) 

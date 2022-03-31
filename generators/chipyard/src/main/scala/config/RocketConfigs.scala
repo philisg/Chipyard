@@ -126,6 +126,13 @@ class CgrameRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: CgrameRocket
 
+// DOC include start: Cgra2x2Rocket
+class Cgra2x2RocketConfig extends Config(
+  new cgra2x2.WithCgra2x2Accel ++				    // add cgra2x2
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: Cgra2x2Rocket
+
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero

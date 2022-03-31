@@ -141,6 +141,8 @@ VERILOG_IP_VERILATOR_FLAGS := \
 	-Wno-UNOPTFLAT \
 	-Wno-BLKANDNBLK \
 	-Wno-style \
+	-Wno-TIMESCALEMOD \
+	-I"/lhome/philisg/chipyard/generators/cgra2x2/src/main/resources/" \
 	-I"/lhome/philisg/chipyard/generators/cgrame/src/main/resources/" \
 	-Wall
 
@@ -172,7 +174,9 @@ VERILATOR_NONCC_OPTS = \
 	$(VERILATOR_OPT_FLAGS) \
 	$(PLATFORM_OPTS) \
 	-Wno-fatal \
-        -I"/lhome/philisg/chipyard/generators/cgrame/src/main/resources/" \
+	-Wno-TIMESCALEMOD \
+	-I"/lhome/philisg/chipyard/generators/cgra2x2/src/main/resources/" \
+	-I"/lhome/philisg/chipyard/generators/cgrame/src/main/resources/" \
 	$(TIMESCALE_OPTS) \
 	$(MAX_WIDTH_OPTS) \
 	$(PREPROC_DEFINES) \
