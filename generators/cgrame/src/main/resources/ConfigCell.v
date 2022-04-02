@@ -1,10 +1,10 @@
-`timescale 1ns / 1ps
+`timescale 1ns/1ps
 module ConfigCell(ConfigIn, ConfigOut, Config_Clock, Config_Reset, select);
     parameter size = 1; 
     input Config_Clock, Config_Reset, ConfigIn;
     output ConfigOut;
     output [size-1:0] select;
-    reg [size:0] temp;
+    reg [size-1:0] temp;
 
     always @(posedge Config_Clock, posedge Config_Reset)begin
         if (Config_Reset)
@@ -15,6 +15,6 @@ module ConfigCell(ConfigIn, ConfigOut, Config_Clock, Config_Reset, select);
                 temp[size-1] <= ConfigIn;
             end
         end
-    assign select = temp[size-1:0];
+    assign select = temp;
     assign ConfigOut = temp[0];
 endmodule
