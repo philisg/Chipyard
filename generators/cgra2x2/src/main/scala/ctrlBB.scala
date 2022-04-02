@@ -185,8 +185,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
           io.rocc_req_rdy                 := Bool(true)
           addr_buffer(0)                  := io.rocc_rs1 
           addr_buffer(2)                  := io.rocc_rs2 
-          // busy                            := Bool(true)
-          // mem_s                           := m_read
+          busy                            := Bool(true)
+          mem_s                           := m_tester
         }.elsewhen(io.rocc_funct === UInt(2)){ //input#2
           io.rocc_req_rdy                 := Bool(true)
           busy                            := Bool(false)
@@ -224,6 +224,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is{s_finished}{
+      k                 := 0
+      j                 := 0
       busy              := Bool(false)
       io.rocc_resp_val  := Bool(false)
       // cgra_clock_en   := Bool(false)
@@ -280,7 +282,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
     is(m_read_CGRA){
       io.mem_req_val  := Bool(true)
-      io.mem_req_addr := request_addr //address from CGRA is only 32-bit
+      // io.mem_req_addr := "h3ffffffafc".U //address from CGRA is only 32-bit THIS WOKS
+      io.mem_req_addr := ("h3f".U << 32) | request_addr.asUInt //address from CGRA is only 32-bit
       io.mem_req_tag  := i
       io.mem_req_cmd  := M_XRD
       io.mem_req_size := log2Ceil(32).U
