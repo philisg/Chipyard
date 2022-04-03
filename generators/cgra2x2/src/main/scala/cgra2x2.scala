@@ -31,7 +31,7 @@ class Cgra2x2BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxR
 	  val ConfigIn  = Input(UInt(1.W))
 	  val ConfigOut = Output(UInt(1.W))
 
-	  val CGRA_Clock = Input(Clock())
+	  val CGRA_Clock = Input(Bool())
 	  val CGRA_Reset = Input(Bool())
     
     val write     = Input(UInt(1.W))
@@ -110,8 +110,8 @@ class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyR
   io.interrupt          <> ctrl.io.interrupt     
 
   //CGRA IO
-  cgra2x2bb.io.CGRA_Clock     := clock
-  // cgra2x2bb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
+  // cgra2x2bb.io.CGRA_Clock     := clock
+  cgra2x2bb.io.CGRA_Clock     := ctrl.io.CGRA_Clock
   cgra2x2bb.io.Config_Clock   := ctrl.io.Config_Clock
   cgra2x2bb.io.CGRA_Reset     := reset
   cgra2x2bb.io.Config_Reset   := ctrl.io.Config_Reset

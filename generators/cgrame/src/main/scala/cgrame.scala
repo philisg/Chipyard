@@ -34,7 +34,7 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
 	  val CGRA_Clock = Input(Clock())
 	  val CGRA_Reset = Input(Bool())
     
-    val write     = Input(UInt(1.W))
+    val write     = Input(Bool())
       // Chisel Analog => Verilog inout
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
