@@ -2,7 +2,6 @@ package cgra2x2
 
 import Chisel._
 import chisel3.util.{HasBlackBoxResource}
-import chisel3.experimental.Analog
 import freechips.rocketchip.tile._
 import freechips.rocketchip.config._
 import freechips.rocketchip.diplomacy._
@@ -91,9 +90,9 @@ class Cgra2x2Accel(opcodes: OpcodeSet)(implicit p: Parameters) extends LazyRoCC(
 
 class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer){
   
-  val cgra2x2bb    = Module(new Cgra2x2BlackBox)
+  val cgra2x2bb   = Module(new Cgra2x2BlackBox)
   val ctrl        = Module(new CtrlBBModule)
-  val cmd         = Queue(io.cmd) //Trengs denne?
+  val cmd         = Queue(io.cmd) 
 
   //RoCC
   io.resp.valid         <> ctrl.io.rocc_resp_val
@@ -131,30 +130,30 @@ class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyR
   cgra2x2bb.io.from_mem0  := ctrl.io.from_mem0
   cgra2x2bb.io.from_mem1  := ctrl.io.from_mem1
 
-  //Memory
-  // def mem_ctrl(req: DecoupledIO[HellaCacheReq]){
-  //   req.valid             := ctrl.io.mem_req_val
-  //   ctrl.io.mem_req_rdy   := req.ready
-  //   req.bits.tag          := ctrl.io.mem_req_tag
-  //   req.bits.addr         := ctrl.io.mem_req_addr
-  //   req.bits.cmd          := ctrl.io.mem_req_cmd
-  //   req.bits.size         := ctrl.io.mem_req_size
-  //   req.bits.data         := ctrl.io.mem_req_data
-  //   req.bits.signed       := Bool(false)
-  //   req.bits.phys         := Bool(false)
-  // }
+  // Memory
+  def mem_ctrl(req: DecoupledIO[HellaCacheReq]){
+    req.valid             := ctrl.io.mem_req_val
+    ctrl.io.mem_req_rdy   := req.ready
+    req.bits.tag          := ctrl.io.mem_req_tag
+    req.bits.addr         := ctrl.io.mem_req_addr
+    req.bits.cmd          := ctrl.io.mem_req_cmd
+    req.bits.size         := ctrl.io.mem_req_size
+    req.bits.data         := ctrl.io.mem_req_data
+    req.bits.signed       := Bool(false)
+    req.bits.phys         := Bool(false)
+  }
 
-  // mem_ctrl(io.mem.req)
+  mem_ctrl(io.mem.req)
 
-  io.mem.req.valid             := ctrl.io.mem_req_val
-  ctrl.io.mem_req_rdy          := io.mem.req.ready
-  io.mem.req.bits.tag          := ctrl.io.mem_req_tag
-  io.mem.req.bits.addr         := ctrl.io.mem_req_addr
-  io.mem.req.bits.cmd          := ctrl.io.mem_req_cmd
-  io.mem.req.bits.size         := ctrl.io.mem_req_size
-  io.mem.req.bits.data         := ctrl.io.mem_req_data
-  io.mem.req.bits.signed       := Bool(false)
-  io.mem.req.bits.phys         := Bool(false)
+  // io.mem.req.valid             := ctrl.io.mem_req_val
+  // ctrl.io.mem_req_rdy          := io.mem.req.ready
+  // io.mem.req.bits.tag          := ctrl.io.mem_req_tag
+  // io.mem.req.bits.addr         := ctrl.io.mem_req_addr
+  // io.mem.req.bits.cmd          := ctrl.io.mem_req_cmd
+  // io.mem.req.bits.size         := ctrl.io.mem_req_size
+  // io.mem.req.bits.data         := ctrl.io.mem_req_data
+  // io.mem.req.bits.signed       := Bool(false)
+  // io.mem.req.bits.phys         := Bool(false)
   
   ctrl.io.mem_resp_val  <> io.mem.resp.valid
   ctrl.io.mem_resp_tag  <> io.mem.resp.bits.tag

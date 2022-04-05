@@ -31,7 +31,7 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
 	  val ConfigIn  = Input(UInt(1.W))
 	  val ConfigOut = Output(UInt(1.W))
 
-	  val CGRA_Clock = Input(Clock())
+	  val CGRA_Clock = Input(Bool())
 	  val CGRA_Reset = Input(Bool())
     
     val write     = Input(Bool())
@@ -107,7 +107,7 @@ class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoC
   
   val cgramebb    = Module(new CgrameBlackBox)
   val ctrl        = Module(new CtrlBBModule)
-  val cmd         = Queue(io.cmd) //Trengs denne?
+  val cmd         = Queue(io.cmd)
 
   //RoCC
   io.resp.valid         <> ctrl.io.rocc_resp_val
@@ -124,8 +124,8 @@ class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoC
   io.interrupt          <> ctrl.io.interrupt     
 
   //CGRA IO
-  cgramebb.io.CGRA_Clock    := clock
-  // cgramebb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
+  // cgramebb.io.CGRA_Clock    := clock
+  cgramebb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
   cgramebb.io.Config_Clock  := ctrl.io.Config_Clock
   cgramebb.io.CGRA_Reset    := reset
   cgramebb.io.Config_Reset  := ctrl.io.Config_Reset

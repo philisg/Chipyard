@@ -197,10 +197,10 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
           busy                        := Bool(false)
           received_vec                := received_vec + 2
           when(received_vec===UInt(12)){
-            state         := s_CGRA_config
-            busy          := Bool(true)
-            received_vec  := 0
-            io.rocc_resp_val  := Bool(true)
+            state           := s_CGRA_config
+            io.Config_Reset := Bool(true)
+            busy            := Bool(true)
+            received_vec    := 0
           }
         }.elsewhen(io.rocc_funct === UInt(1)){ //output/input 
           io.rocc_req_rdy                 := Bool(true)
@@ -225,7 +225,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(s_idle){
     }
     is(s_CGRA_config){
-      io.Config_Reset := Bool(false)
       busy            := Bool(true)
       config_clock_en := Bool(true)
       cgra_clock_en   := Bool(true)
@@ -244,11 +243,11 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is{s_finished}{
-      busy              := Bool(false)
-      io.rocc_resp_val  := Bool(false)
-      // cgra_clock_en   := Bool(false)
-      rocc_s            := r_idle
-      state             := s_idle
+      k           := 0
+      j           := 0
+      busy        := Bool(false)
+      // cgra_clock_en := Bool(false)
+      state       := s_idle
     }
   } //end state
   
@@ -257,7 +256,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(m_idle){
       when(state =/= s_CGRA_config){// Should not fetch when configuring cgra
         //Check if we want to write, that there is a new write and that address is within range
-        when((write_rq_vec(i) === Bool(true)) && (last_write_address(i) =/= memory_addr(i)) && (memory_addr(i) > "h80000000".U)){ 
+        when((write_rq_vec(i) === Bool(true)) && (last_write_address(i) =/= memory_addr(i)) && (memory_addr(i) >= "hfffff000".U)){ 
           mem_s           := m_write_CGRA
           request_addr    := memory_addr(i)
           busy            := Bool(true)
@@ -265,7 +264,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
 
         //Since not write, we want to read, chack that there is a new read and that it is whitin the memory range
-        }.elsewhen(last_read_address(i) =/= memory_addr(i) && (memory_addr(i) > "h80000000".U)){
+        }.elsewhen(last_read_address(i) =/= memory_addr(i) && (memory_addr(i) >= "hfffff000".U)){
           request_addr    := memory_addr(i)
           mem_s           := m_read_CGRA
           busy            := Bool(true)
