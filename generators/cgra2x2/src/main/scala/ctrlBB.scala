@@ -112,15 +112,16 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val data_to_memory    = Reg(init = Vec.fill(arraySize) { 0.U(64.W) })
   val memory_addr       = Reg(init = Vec.fill(arraySize) { 0.U(64.W) })
   val request_addr      = Reg(init = UInt(0,64))
+  
   //default
 
-  io.Config_Reset       := Bool(false)
-  config_clock_en       := Bool(false)
-  io.rocc_req_rdy       := Bool(false)
-  io.rocc_resp_val      := Bool(false)
-  io.interrupt          := Bool(false)                                                                                                                      
+  io.Config_Reset       := false.B
+  config_clock_en       := false.B
+  io.rocc_req_rdy       := false.B
+  io.rocc_resp_val      := false.B
+  io.interrupt          := false.B                                                                                                                     
   io.busy               := busy
-  io.mem_req_val        := Bool(false)
+  io.mem_req_val        := false.B
   io.mem_req_tag        := UInt(0)
   io.mem_req_addr       := Bits(0, 64)
   io.mem_req_cmd        := M_XRD
@@ -178,27 +179,27 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       io.rocc_req_rdy := !busy
       when(io.rocc_req_val && !busy){
         when(io.rocc_funct === UInt(0)){ //Config
-          io.rocc_req_rdy             := Bool(true)
+          io.rocc_req_rdy             := true.B
           cgra_config(received_vec)   := Reverse(io.rocc_rs1)
           cgra_config(received_vec+1) := Reverse(io.rocc_rs2)
           received_vec                := received_vec + 2
           when(received_vec===UInt(2)){
             state         := s_CGRA_config
-            busy          := Bool(true)
+            busy          := true.B
             received_vec  := 0
           }
         }.elsewhen(io.rocc_funct === UInt(1)){ //output/input 
-          io.rocc_req_rdy                 := Bool(true)
+          io.rocc_req_rdy                 := true.B
           addr_buffer(0)                  := io.rocc_rs1 
           addr_buffer(2)                  := io.rocc_rs2 
-          busy                            := Bool(false)
+          busy                            := false.B
         }.elsewhen(io.rocc_funct === UInt(2)){ //input#2
-          io.rocc_req_rdy                 := Bool(true)
-          busy                            := Bool(false)
+          io.rocc_req_rdy                 := true.B
+          busy                            := false.B
           addr_buffer(1)                  := io.rocc_rs1
         }.elsewhen(io.rocc_funct === UInt(3)){ //input length #1|#2  src2(lenI2)	src1(lenI1)
-          io.rocc_req_rdy                 := Bool(true)
-          busy                            := Bool(false)
+          io.rocc_req_rdy                 := true.B
+          busy                            := false.B
           data_len(0)                     := io.rocc_rs1
           data_len(1)                     := io.rocc_rs2
         }
@@ -210,9 +211,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(s_idle){
     }
     is(s_CGRA_config){
-      busy            := Bool(true)
-      config_clock_en := Bool(true)
-      cgra_clock_en   := Bool(true)
+      busy            := true.B
+      config_clock_en := true.B
+      cgra_clock_en   := true.B
       
       when(clock_reg){
         io.cgra_Inconfig  := cgra_config(j)(k)
@@ -225,13 +226,13 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       when(j === UInt(3) && k === UInt(32)){
         state           := s_finished
         mem_s           := m_accum_address
-        config_clock_en := Bool(false)
+        config_clock_en := false.B
       }
     }
     is{s_finished}{
       k                 := 0
       j                 := 0
-      busy              := Bool(false)
+      busy              := false.B
       state             := s_idle
     }
     
@@ -244,7 +245,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val receive_counter     = Reg(init = Bits(0,5))
   val send_counter        = Reg(init = Bits(0,5))
   val last_address        = Reg(init = UInt(0,39))
-  val iteration_target    = Reg(init = UInt(4,5))
 
 
   //Memory handler
@@ -266,7 +266,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         last_address    := io.addr1
         address_counter := address_counter + 1
       }
-      when(address_counter === 3){
+      when(address_counter === 7){
         mem_s             := m_accum_data
         cgra_clock_en     := false.B
         receive_counter   := 0
@@ -309,17 +309,17 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(m_idle){
       when(state =/= s_CGRA_config){// Should not fetch when configuring cgra
         //Check if we want to write, that there is a new write and that address is within range
-        when((write_rq_vec(i) === Bool(true)) && (last_req_address(i) =/= memory_addr(i)) && (memory_addr(i) >= "hfffff000".U)){ 
+        when((write_rq_vec(i) === true.B) && (last_req_address(i) =/= memory_addr(i)) && (memory_addr(i) >= "hfffff000".U)){ 
           mem_s           := m_write_CGRA
           request_addr    := memory_addr(i)
-          cgra_clock_en   := Bool(false)
+          cgra_clock_en   := false.B
 
         //Since not write, we want to read, chack that there is a new read and that it is whitin the memory range
         }.elsewhen(last_req_address(i) =/= memory_addr(i) && (memory_addr(i) >= "hfffff000".U)){
           request_addr    := memory_addr(i)
           mem_s           := m_read_CGRA
-          busy            := Bool(true)
-          cgra_clock_en   := Bool(false)
+          busy            := true.B
+          cgra_clock_en   := false.B
 
         }.otherwise{
           //wrap around when checked every register!
@@ -332,7 +332,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is(m_read_CGRA){
-      io.mem_req_val  := Bool(true)
+      io.mem_req_val  := true.B
       io.mem_req_addr := ("h3f".U << 32) | request_addr.asUInt //address from CGRA is only 32-bit
       io.mem_req_tag  := i
       io.mem_req_cmd  := M_XRD
@@ -344,15 +344,15 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
     is(m_wait_CGRA){
       when(io.mem_resp_val){
-        busy                    := Bool(false)
-        cgra_clock_en           := Bool(true)
+        busy                    := false.B
+        cgra_clock_en           := true.B
         data_from_memory(i)     := io.mem_resp_data
         mem_s                   := m_idle
       }
     }
     is(m_write_CGRA){
-      busy            := Bool(true)
-      io.mem_req_val  := Bool(true)
+      busy            := true.B
+      io.mem_req_val  := true.B
       io.mem_req_addr := ("h3f".U << 32) | request_addr.asUInt //address from CGRA is only 32-bit
       io.mem_req_tag  := i
       io.mem_req_cmd  := M_XWR
@@ -362,8 +362,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
       when(io.mem_resp_val && io.mem_resp_tag === i){
         mem_s             := m_idle
-        cgra_clock_en     := Bool(true)
-        busy              := Bool(false)
+        cgra_clock_en     := true.B
+        busy              := false.B
       }.otherwise{
         mem_s             := m_write_CGRA
       }

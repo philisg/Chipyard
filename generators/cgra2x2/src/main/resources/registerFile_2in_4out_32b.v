@@ -26,7 +26,7 @@ module registerFile_2in_4out_32b(CGRA_Clock, CGRA_Reset, WE0, WE1, address_in0, 
             begin : RESET
                 integer i;
                 for (i = 0; i < 2**log2regs; i = i+1)
-                    register[i] <= 1;
+                    register[i] <= 0;
             end
         else
             begin
