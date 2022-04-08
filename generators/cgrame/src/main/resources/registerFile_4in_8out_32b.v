@@ -40,26 +40,26 @@ module registerFile_4in_8out_32b(CGRA_Clock, CGRA_Reset, WE0, WE1, WE2, WE3, add
             begin : RESET
                 integer i;
                 for (i = 0; i < 2**log2regs; i = i+1)
-                    register[i] = 0;
+                    register[i] <= 0;
             end
         else
             begin
-                out0 = register[address_out0];
-                out1 = register[address_out1];
-                out2 = register[address_out2];
-                out3 = register[address_out3];
-                out4 = register[address_out4];
-                out5 = register[address_out5];
-                out6 = register[address_out6];
-                out7 = register[address_out7];
+                out0 <= register[address_out0];
+                out1 <= register[address_out1];
+                out2 <= register[address_out2];
+                out3 <= register[address_out3];
+                out4 <= register[address_out4];
+                out5 <= register[address_out5];
+                out6 <= register[address_out6];
+                out7 <= register[address_out7];
                 if(WE0)
-                    register[address_in0] = in0;
+                    register[address_in0] <= in0;
                 if(WE1)
-                    register[address_in1] = in1;
+                    register[address_in1] <= in1;
                 if(WE2)
-                    register[address_in2] = in2;
+                    register[address_in2] <= in2;
                 if(WE3)
-                    register[address_in3] = in3;
+                    register[address_in3] <= in3;
             end
 endmodule
 

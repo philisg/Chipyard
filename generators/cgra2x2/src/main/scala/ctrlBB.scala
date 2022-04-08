@@ -112,7 +112,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val data_to_memory    = Reg(init = Vec.fill(arraySize) { 0.U(64.W) })
   val memory_addr       = Reg(init = Vec.fill(arraySize) { 0.U(64.W) })
   val request_addr      = Reg(init = UInt(0,64))
-  val tempSint          = Reg(init = SInt(0,3))
   //default
 
   io.Config_Reset       := Bool(false)
@@ -135,10 +134,10 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
   write_rq_vec(0)       := io.write_rq0
   write_rq_vec(1)       := io.write_rq1
-  // io.from_mem0          := data_from_memory(0)
-  // io.from_mem1          := data_from_memory(1)
-  io.from_mem0          := UInt(55)
-  io.from_mem1          := UInt(11)
+  io.from_mem0          := data_from_memory(0)
+  io.from_mem1          := data_from_memory(1)
+  // io.from_mem0          := UInt(55)
+  // io.from_mem1          := UInt(11)
   data_to_memory(0)     := io.to_mem0
   data_to_memory(1)     := io.to_mem1
   memory_addr(0)        := io.addr0
@@ -245,6 +244,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val receive_counter     = Reg(init = Bits(0,5))
   val send_counter        = Reg(init = Bits(0,5))
   val last_address        = Reg(init = UInt(0,39))
+  val iteration_target    = Reg(init = UInt(4,5))
+
+
   //Memory handler
   when(io.mem_resp_val && ((mem_s === m_accum_data) || (mem_s === m_receive_data_from_mem))){
     data_vec(io.mem_resp_tag) := io.mem_resp_data
@@ -255,25 +257,29 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(m_accum_address){
       busy          := true.B
       cgra_clock_en := true.B
-      when(io.addr0 =/= last_address){
-        request_adress_vec(address_counter) := io.addr0
-        last_address    := io.addr0
+      when(io.addr1 =/= last_address && io.addr1 > "hffff0000".U){
+        request_adress_vec(address_counter) := ("h3f".U << 32) | io.addr1.asUInt
+        last_address    := io.addr1
+        address_counter := address_counter + 1
+      }.elsewhen(io.addr1 =/= last_address && io.addr1 < "hf0000".U){
+        request_adress_vec(address_counter) := io.addr1
+        last_address    := io.addr1
         address_counter := address_counter + 1
       }
-      when(address_counter >= 4){
-        mem_s         := m_accum_data
-        cgra_clock_en := false.B
-        receive_counter := 0
-        data_counter    := 0
+      when(address_counter === 3){
+        mem_s             := m_accum_data
+        cgra_clock_en     := false.B
+        receive_counter   := 0
+        data_counter      := 0
       }
     }
     is(m_accum_data){
-      io.mem_req_val  := true.B
-      io.mem_req_addr := ("h3f".U << 32) | request_adress_vec(data_counter).asUInt //address from CGRA is only 32-bit
+      io.mem_req_val  := (request_adress_vec(data_counter) =/= "h000000000".U)
+      io.mem_req_addr := request_adress_vec(data_counter).asUInt //address from CGRA is only 32-bit
       io.mem_req_tag  := data_counter
       io.mem_req_cmd  := M_XRD
       io.mem_req_size := log2Ceil(32).U
-      when(io.mem_req_rdy && io.mem_req_val){
+      when(io.mem_req_rdy){
         data_counter  := data_counter + 1
         mem_s         := m_accum_data
         when(data_counter === address_counter){
@@ -288,9 +294,11 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is(m_send_data_to_cgra){
+      cgra_clock_en := true.B
       when(clock_reg){ //for every 2nd clock cycle
-        io.from_mem0  := data_vec(send_counter)
-        send_counter  := send_counter + 1
+        data_from_memory(0) := data_vec(send_counter)
+        data_from_memory(1) := data_vec(send_counter)
+        send_counter        := send_counter + 1
       }
       when(send_counter === address_counter){
         mem_s         := m_idle
@@ -331,7 +339,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       io.mem_req_size := log2Ceil(32).U
       when(io.mem_req_rdy && io.mem_req_val){
         mem_s                 := m_wait_CGRA
-        last_req_address(i)  := request_addr
+        last_req_address(i)   := request_addr
       }
     }
     is(m_wait_CGRA){
