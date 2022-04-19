@@ -130,7 +130,7 @@ class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyR
   cgra2x2bb.io.from_mem0  := ctrl.io.from_mem0
   cgra2x2bb.io.from_mem1  := ctrl.io.from_mem1
 
-  // Memory
+  //Memory
   def mem_ctrl(req: DecoupledIO[HellaCacheReq]){
     req.valid             := ctrl.io.mem_req_val
     ctrl.io.mem_req_rdy   := req.ready
