@@ -140,7 +140,7 @@ class Cgra6x6AccelImp(outer: Cgra6x6Accel)(implicit p: Parameters) extends LazyR
   // cgra6x6bb.io.CGRA_Clock    := clock
   cgra6x6bb.io.CGRA_Clock   := ctrl.io.CGRA_Clock
   cgra6x6bb.io.Config_Clock := ctrl.io.Config_Clock
-  cgra6x6bb.io.CGRA_Reset   := reset
+  cgra6x6bb.io.CGRA_Reset   := ctrl.io.CGRA_Reset
   cgra6x6bb.io.Config_Reset := ctrl.io.Config_Reset
   cgra6x6bb.io.ConfigIn     := ctrl.io.cgra_Inconfig
   ctrl.io.cgra_Outconfig    := cgra6x6bb.io.ConfigOut

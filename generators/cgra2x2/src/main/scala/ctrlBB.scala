@@ -48,7 +48,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
     val cgra_Outconfig    = Bool(INPUT)
-    val write             = Bits(OUTPUT)
+    val write0            = Bits(OUTPUT)
+    val write1            = Bits(OUTPUT)
     val from_cgra0        = Bits(INPUT, 32)
     val from_cgra1        = Bits(INPUT, 32)
     val to_cgra0          = Bits(OUTPUT,32)
@@ -140,7 +141,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
   io.to_cgra0           := UInt(0)
   io.to_cgra1           := UInt(0)
-  io.write              := UInt(0)
+  io.write0             := UInt(0)
+  io.write1             := UInt(0)
 
   write_rq_vec(0)       := io.write_rq0
   write_rq_vec(1)       := io.write_rq1
@@ -354,8 +356,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         //Since not write, we want to read, chack that there is a new read and that it is whitin the memory range
         }.elsewhen(last_req_address(i) =/= memory_addr(i) && (memory_addr(i) >= "hfffff000".U)){
           request_addr    := memory_addr(i)
-          mem_s           := m_read_CGRA
-          busy            := true.B
+          // mem_s           := m_read_CGRA
+          // busy            := true.B
           cgra_clock_en   := false.B
 
         }.otherwise{

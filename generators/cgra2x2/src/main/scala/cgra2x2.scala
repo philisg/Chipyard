@@ -33,7 +33,8 @@ class Cgra2x2BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxR
 	  val CGRA_Clock = Input(Bool())
 	  val CGRA_Reset = Input(Bool())
     
-    val write     = Input(UInt(1.W))
+    val write0     = Input(UInt(1.W))
+    val write1     = Input(UInt(1.W))
       // Chisel Analog => Verilog inout
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
@@ -120,6 +121,8 @@ class Cgra2x2AccelImp(outer: Cgra2x2Accel)(implicit p: Parameters) extends LazyR
   ctrl.io.from_cgra1          <> cgra2x2bb.io.dataOut1
   cgra2x2bb.io.dataIn0        := ctrl.io.to_cgra0
   cgra2x2bb.io.dataIn1        := ctrl.io.to_cgra1
+  cgra2x2bb.io.write0         := ctrl.io.write0
+  cgra2x2bb.io.write1         := ctrl.io.write1
 
   ctrl.io.write_rq0       := cgra2x2bb.io.write_rq0
   ctrl.io.write_rq1       := cgra2x2bb.io.write_rq1

@@ -12,7 +12,8 @@ module Cgra2x2BlackBox(
         dataIn1,
         dataOut0,
         dataOut1,
-        write,
+        write0,
+        write1,
         write_rq0,
         from_mem0,
         to_mem0,
@@ -25,7 +26,7 @@ module Cgra2x2BlackBox(
     // Specifying the ports
     input Config_Clock, Config_Reset, ConfigIn;
     output ConfigOut;
-    input CGRA_Clock, CGRA_Reset, write;
+    input CGRA_Clock, CGRA_Reset, write0, write1;
     input [31:0] dataIn0;
     input [31:0] dataIn1;
     output [31:0] dataOut0;
@@ -49,8 +50,8 @@ module Cgra2x2BlackBox(
     assign dataOut0 = ext_io_top_0;
     assign dataOut1 = ext_io_top_1;
     
-    assign ext_io_top_0 = (write)? dataIn0 : 32'dz;
-    assign ext_io_top_1 = (write)? dataIn1 : 32'dz;
+    assign ext_io_top_0 = (write0)? dataIn0 : 32'dz;
+    assign ext_io_top_1 = (write1)? dataIn1 : 32'dz;
 
     // Wires for the the config cells
     wire [2:0] DrfAddrIn0_sig;
