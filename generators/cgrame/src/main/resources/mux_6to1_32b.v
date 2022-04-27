@@ -18,7 +18,7 @@ module mux_6to1_32b(in0, in1, in2, in3, in4, in5, out, select);
             3: out = in3;
             4: out = in4;
             5: out = in5;
-            default: out = {size{1'bx}};
+            default: out = {size{1'b0}};
         endcase
 endmodule
 

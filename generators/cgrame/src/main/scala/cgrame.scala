@@ -33,7 +33,10 @@ class CgrameBlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxRe
 	  val CGRA_Clock = Input(Bool())
 	  val CGRA_Reset = Input(Bool())
     
-    val write     = Input(Bool())
+    val write0     = Input(Bool())
+    val write1     = Input(Bool())
+    val write2     = Input(Bool())
+    val write3     = Input(Bool())
       // Chisel Analog => Verilog inout
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
@@ -129,6 +132,10 @@ class CgrameAccelImp(outer: CgrameAccel)(implicit p: Parameters) extends LazyRoC
   cgramebb.io.CGRA_Reset    := reset
   cgramebb.io.Config_Reset  := ctrl.io.Config_Reset
   cgramebb.io.ConfigIn      := ctrl.io.cgra_Inconfig
+  cgramebb.io.write0        := ctrl.io.write0
+  cgramebb.io.write1        := ctrl.io.write1
+  cgramebb.io.write2        := ctrl.io.write2
+  cgramebb.io.write3        := ctrl.io.write3
   ctrl.io.cgra_Outconfig    := cgramebb.io.ConfigOut
   ctrl.io.from_cgra0        <> cgramebb.io.dataOut0
   ctrl.io.from_cgra1        <> cgramebb.io.dataOut1

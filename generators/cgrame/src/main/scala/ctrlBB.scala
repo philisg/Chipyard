@@ -49,7 +49,10 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
     val cgra_Outconfig    = Bool(INPUT)
-    val write             = Bits(OUTPUT)
+    val write0            = Bits(OUTPUT)
+    val write1            = Bits(OUTPUT)
+    val write2            = Bits(OUTPUT)
+    val write3            = Bits(OUTPUT)
     val from_cgra0        = Bits(INPUT, 32)
     val from_cgra1        = Bits(INPUT, 32)
     val from_cgra2        = Bits(INPUT, 32)
@@ -155,7 +158,10 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
   io.to_cgra0           := UInt(0)
   io.to_cgra1           := UInt(0)
-  io.write              := UInt(0)
+  io.write0             := UInt(0)
+  io.write1             := UInt(0)
+  io.write2             := UInt(0)
+  io.write3             := UInt(0)
 
   write_rq_vec(0)       := io.write_rq0
   write_rq_vec(1)       := io.write_rq1
@@ -239,7 +245,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         }.elsewhen(io.rocc_funct === UInt(3)){ //input length #1|#2  src2(lenI2)	src1(lenI1)
           io.rocc_req_rdy                 := true.B
           busy                            := true.B       //We strart the calculation  here!!!!!!
-          input_len(1)                    := io.rocc_rs1  //use only this as we just need to know how long we will run (iterations)
+          input_len(1)                    := io.rocc_rs1  //use this to know how long we will run (iterations)
           input_len(2)                    := io.rocc_rs2
           cgra_clock_en                   := true.B
           mem_s                           := m_accum_address
@@ -273,10 +279,10 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       }
     }
     is(s_wait_for_correct_output){
-      when(io.from_cgra0 =/= output_data && (output_counter =/= address_counter/2)){
+      when(io.from_cgra3 =/= output_data && (output_counter =/= address_counter)){
         output_counter  := output_counter + 1
-        output_data     := io.from_cgra0
-      }.elsewhen(output_counter === address_counter/2){
+        output_data     := io.from_cgra3
+      }.elsewhen(output_counter === address_counter){
         cgra_clock_en   := false.B
         when(mem_s === (m_idle | m_send_data_to_cgra)){
           mem_s             := m_write_output
@@ -313,25 +319,28 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     is(m_accum_address){
       busy          := true.B
       cgra_clock_en := true.B
-      when(io.addr2 =/= last_address){
-        when(io.addr2 > "hffff0000".U){
-          request_adress_vec(address_counter) := ("h3f".U << 32) | io.addr2.asUInt
-          last_address    := io.addr2
+      when(io.addr0 =/= last_address){
+        when(io.addr0 > "hffff0000".U){
+          request_adress_vec(address_counter) := ("h3f".U << 32) | io.addr0.asUInt
+          last_address    := io.addr0
           address_counter := address_counter + 1
-        }.elsewhen(io.addr2 < "hf0000".U){
+        }.elsewhen(io.addr0 < "hf0000".U){
           when(has_input1 && has_input2){
-            request_adress_vec(address_counter)   := input1_adress.asUInt + io.addr2.asUInt - 4
-            request_adress_vec(address_counter+1) := input2_adress.asUInt + io.addr2.asUInt - 4
+            request_adress_vec(address_counter)   := input1_adress.asUInt + io.addr0.asUInt - 4
+            request_adress_vec(address_counter+1) := input2_adress.asUInt + io.addr0.asUInt - 4
+            address_counter := address_counter + 2
           }.elsewhen(has_input1){
-            request_adress_vec(address_counter)   := input1_adress.asUInt + io.addr2.asUInt - 4         
+            request_adress_vec(address_counter)   := input1_adress.asUInt + io.addr0.asUInt - 4   
+            address_counter := address_counter + 1      
           }.otherwise{
-            request_adress_vec(address_counter)   := io.addr2
+            request_adress_vec(address_counter)   := io.addr0
+            address_counter := address_counter + 1
           }
-        last_address    := io.addr2
-        address_counter := address_counter + 2
+        last_address    := io.addr0
+        
         }
       }
-      when(address_counter === input_len(1)*2){
+      when(address_counter === input_len(1)){
         mem_s             := m_accum_data
         cgra_clock_en     := false.B
         receive_counter   := 0
@@ -364,9 +373,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         state       := s_wait_for_correct_output
       }
       when(clock_reg){ //for every 2nd clock cycle
-        data_from_memory(2) := data_vec(send_counter)
+        data_from_memory(0) := data_vec(send_counter)
         data_from_memory(3) := data_vec(send_counter+1)
-        send_counter        := send_counter + 2
+        send_counter        := send_counter + 1
       }
       when(send_counter === address_counter + 2){
         mem_s         := m_idle

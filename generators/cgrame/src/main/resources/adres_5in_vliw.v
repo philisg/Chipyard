@@ -1,4 +1,5 @@
 `timescale 1ns/1ps
+/* verilator lint_off UNOPTFLAT */
 module adres_5in_vliw(Config_Clock, Config_Reset, ConfigIn, ConfigOut, fu_to_rf, in0, in1, in2, in3, in4, out, rf_to_muxa, rf_to_muxout);
     // Specifying the ports
     input Config_Clock, Config_Reset, ConfigIn;
@@ -66,7 +67,7 @@ module adres_5in_vliw(Config_Clock, Config_Reset, ConfigIn, ConfigOut, fu_to_rf,
         .select(MuxOutConfig_sig));
 
     // Declaring the submodules
-    const_32b #(32) ConstVal(
+    const_32b #(32) constVal(
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(MuxOutConfig_config),

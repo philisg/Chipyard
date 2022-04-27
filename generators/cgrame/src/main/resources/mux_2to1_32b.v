@@ -10,7 +10,7 @@ module mux_2to1_32b(in0, in1, out, select);
         case (select)
             0: out = in0;
             1: out = in1;
-            default: out = {size{1'bx}};
+            default: out = {size{1'b0}};
         endcase
 endmodule
 

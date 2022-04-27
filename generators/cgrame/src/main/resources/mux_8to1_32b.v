@@ -22,7 +22,7 @@ module mux_8to1_32b(in0, in1, in2, in3, in4, in5, in6, in7, out, select);
             5: out = in5;
             6: out = in6;
             7: out = in7;
-            default: out = {size{1'bx}};
+            default: out = {size{1'b0}};
         endcase
 endmodule
 

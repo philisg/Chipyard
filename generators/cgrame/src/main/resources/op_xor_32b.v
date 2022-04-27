@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-
 module op_xor_32b(a, b, c);
     parameter size = 32;
     // Specifying the ports
@@ -8,3 +7,4 @@ module op_xor_32b(a, b, c);
     output [size-1:0] c;
     assign c = a ^ b;
 endmodule
+

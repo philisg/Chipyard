@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module memoryPort_4connect_32b(Config_Clock, Config_Reset, ConfigIn, ConfigOut, in0, in1, in2, in3, out,write_rq, from_mem, to_mem, addr);
+module memoryPort_4connect_32b(Config_Clock, Config_Reset, ConfigIn, ConfigOut, in0, in1, in2, in3, out, write_rq, from_mem, to_mem, addr);
     // Specifying the ports
     input Config_Clock, Config_Reset, ConfigIn;
     output ConfigOut;
@@ -7,12 +7,11 @@ module memoryPort_4connect_32b(Config_Clock, Config_Reset, ConfigIn, ConfigOut, 
     input [31:0] in1;
     input [31:0] in2;
     input [31:0] in3;
-    input [31:0] from_mem;
     output [31:0] out;
+    input [31:0] from_mem;
     output write_rq;
     output [31:0] addr;
     output [31:0] to_mem;
-    
 
     // Wires for the the config cells
     wire [1:0] MuxAddr_sig;
@@ -61,12 +60,12 @@ module memoryPort_4connect_32b(Config_Clock, Config_Reset, ConfigIn, ConfigOut, 
         .in3(in3),
         .out(mux_data_out_sig),
         .select(MuxData_sig));
-    //Place memory module outside blackbox
+        
     assign write_rq     = WriteRq_sig;
     assign to_mem       = mux_data_out_sig;
     assign addr         = mux_addr_out_sig;
     assign out          = from_mem;
     
-    assign ConfigOut    = WriteRq_config;
+    assign ConfigOut = WriteRq_config;
 endmodule
 

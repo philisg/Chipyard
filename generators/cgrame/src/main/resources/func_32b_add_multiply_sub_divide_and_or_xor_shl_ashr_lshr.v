@@ -43,7 +43,7 @@ module func_32b_add_multiply_sub_divide_and_or_xor_shl_ashr_lshr(in_a, in_b, out
             7: out = shl_sel;
             8: out = ashr_sel;
             9: out = lshr_sel;
-            default: out = {size{1'bx}};
+            default: out = {size{1'b0}};
         endcase
 endmodule
 

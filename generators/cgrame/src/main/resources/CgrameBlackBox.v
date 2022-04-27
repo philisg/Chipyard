@@ -1,49 +1,62 @@
 `timescale 1ns/1ps
-// Main module
 module CgrameBlackBox(
-            Config_Clock, 
-            Config_Reset, 
-            ConfigIn, 
-            ConfigOut, 
-            CGRA_Clock, 
-            CGRA_Reset, 
-/*            ext_io_top_0,
-            ext_io_top_1,
-            ext_io_top_2,
-            ext_io_top_3,*/
-            dataIn0,
-            dataIn1,
-            dataIn2,
-            dataIn3,
-            dataOut0,
-            dataOut1,
-            dataOut2,
-            dataOut3,
-            write,
-            write_rq0,
-            from_mem0,
-            to_mem0,
-            addr0,
-            write_rq1,
-            from_mem1,
-            to_mem1,
-            addr1,
-            write_rq2,
-            from_mem2,
-            to_mem2,
-            addr2,
-            write_rq3,
-            from_mem3,
-            to_mem3,
-            addr3
-            );
-            
+        Config_Clock, 
+        Config_Reset, 
+        ConfigIn, 
+        ConfigOut, 
+        CGRA_Clock, 
+        CGRA_Reset, 
+//        ext_io_top_0, 
+//        ext_io_top_1, 
+//        ext_io_top_2, 
+//        ext_io_top_3,
+        dataIn0,
+        dataIn1,
+        dataIn2,
+        dataIn3,
+        dataOut0,
+        dataOut1,
+        dataOut2,
+        dataOut3,
+        write0,
+        write1,
+        write2,
+        write3,
+        write_rq0,
+        from_mem0,
+        to_mem0,
+        addr0,
+        write_rq1,
+        from_mem1,
+        to_mem1,
+        addr1,
+        write_rq2,
+        from_mem2,
+        to_mem2,
+        addr2,
+        write_rq3,
+        from_mem3,
+        to_mem3,
+        addr3
+        );
     // Specifying the ports
     input Config_Clock, Config_Reset, ConfigIn;
     output ConfigOut;
     input CGRA_Clock, CGRA_Reset;
+//    inout [31:0] ext_io_top_0;
+//    inout [31:0] ext_io_top_1;
+//    inout [31:0] ext_io_top_2;
+//    inout [31:0] ext_io_top_3;
+    input write0, write1, write2, write3;
+    input [31:0] dataIn0;
+    input [31:0] dataIn1;
+    input [31:0] dataIn2;
+    input [31:0] dataIn3;
+    output [31:0] dataOut0;
+    output [31:0] dataOut1;
+    output [31:0] dataOut2;
+    output [31:0] dataOut3;
     
-
     output write_rq0;
     input [31:0] from_mem0;
     output [31:0] to_mem0;
@@ -60,38 +73,23 @@ module CgrameBlackBox(
     input [31:0] from_mem3;
     output [31:0] to_mem3;
     output [31:0] addr3;
-
-/*    inout [31:0] ext_io_top_0;
-    inout [31:0] ext_io_top_1;
-    inout [31:0] ext_io_top_2;
-    inout [31:0] ext_io_top_3;*/
+    
     wire [31:0] ext_io_top_0;
     wire [31:0] ext_io_top_1;
     wire [31:0] ext_io_top_2;
     wire [31:0] ext_io_top_3;
-
-    input write;
-    input [31:0] dataIn0;
-    input [31:0] dataIn1;
-    input [31:0] dataIn2;
-    input [31:0] dataIn3;
-    output [31:0] dataOut0;
-    output [31:0] dataOut1;
-    output [31:0] dataOut2;
-    output [31:0] dataOut3;
-
-    assign ext_io_top_0 = write? dataIn0 : 32'dz;
-    assign ext_io_top_1 = write? dataIn1 : 32'dz;
-    assign ext_io_top_2 = write? dataIn2 : 32'dz;
-    assign ext_io_top_3 = write? dataIn3 : 32'dz;
+    
     assign dataOut0 = ext_io_top_0;
     assign dataOut1 = ext_io_top_1;
     assign dataOut2 = ext_io_top_2;
     assign dataOut3 = ext_io_top_3;
+    
+    assign ext_io_top_0 = (write0)? dataIn0 : 32'dz;
+    assign ext_io_top_1 = (write1)? dataIn1 : 32'dz;
+    assign ext_io_top_2 = (write2)? dataIn2 : 32'dz;
+    assign ext_io_top_3 = (write3)? dataIn3 : 32'dz;
 
     // Wires for the the config cells
-
-    
     wire [2:0] DrfAddrIn0_sig;
     wire DrfAddrIn0_config;
     wire [2:0] DrfAddrIn1_sig;
@@ -223,9 +221,9 @@ module CgrameBlackBox(
 
     // Wires connecting the main module and submodules
     wire [31:0] io_top_1_out_sig;
-    wire [31:0] io_top_3_out_sig;
     wire [31:0] io_top_2_out_sig;
     wire [31:0] io_top_0_out_sig;
+    wire [31:0] io_top_3_out_sig;
     wire [31:0] mem_0_out_sig;
     wire [31:0] mem_1_out_sig;
     wire [31:0] mem_2_out_sig;
@@ -392,313 +390,313 @@ module CgrameBlackBox(
         .ConfigIn(DrfAddrOut6_config),
         .ConfigOut(DrfAddrOut7_config),
         .select(DrfAddrOut7_sig));
-    ConfigCell #(1) DrfWE0 (//-------------------------------------------1
+    ConfigCell #(1) DrfWE0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(DrfAddrOut7_config),
         .ConfigOut(DrfWE0_config),
         .select(DrfWE0_sig));
-    ConfigCell #(1) DrfWE1 (//-------------------------------------------1
+    ConfigCell #(1) DrfWE1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(DrfWE0_config),
         .ConfigOut(DrfWE1_config),
         .select(DrfWE1_sig));
-    ConfigCell #(1) DrfWE2 (//-------------------------------------------1
+    ConfigCell #(1) DrfWE2 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(DrfWE1_config),
         .ConfigOut(DrfWE2_config),
         .select(DrfWE2_sig));
-    ConfigCell #(1) DrfWE3 (//-------------------------------------------1
+    ConfigCell #(1) DrfWE3 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(DrfWE2_config),
         .ConfigOut(DrfWE3_config),
         .select(DrfWE3_sig));
-    ConfigCell #(1) RfC0R1AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R1AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(DrfWE3_config),
         .ConfigOut(RfC0R1AddrIn0_config),
         .select(RfC0R1AddrIn0_sig));
-    ConfigCell #(1) RfC0R1AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R1AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R1AddrIn0_config),
         .ConfigOut(RfC0R1AddrOut0_config),
         .select(RfC0R1AddrOut0_sig));
-    ConfigCell #(1) RfC0R1AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R1AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R1AddrOut0_config),
         .ConfigOut(RfC0R1AddrOut1_config),
         .select(RfC0R1AddrOut1_sig));
-    ConfigCell #(1) RfC0R1WE (//-------------------------------------------1
+    ConfigCell #(1) RfC0R1WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R1AddrOut1_config),
         .ConfigOut(RfC0R1WE_config),
         .select(RfC0R1WE_sig));
-    ConfigCell #(1) RfC0R2AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R2AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R1WE_config),
         .ConfigOut(RfC0R2AddrIn0_config),
         .select(RfC0R2AddrIn0_sig));
-    ConfigCell #(1) RfC0R2AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R2AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R2AddrIn0_config),
         .ConfigOut(RfC0R2AddrOut0_config),
         .select(RfC0R2AddrOut0_sig));
-    ConfigCell #(1) RfC0R2AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R2AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R2AddrOut0_config),
         .ConfigOut(RfC0R2AddrOut1_config),
         .select(RfC0R2AddrOut1_sig));
-    ConfigCell #(1) RfC0R2WE (//-------------------------------------------1
+    ConfigCell #(1) RfC0R2WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R2AddrOut1_config),
         .ConfigOut(RfC0R2WE_config),
         .select(RfC0R2WE_sig));
-    ConfigCell #(1) RfC0R3AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R3AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R2WE_config),
         .ConfigOut(RfC0R3AddrIn0_config),
         .select(RfC0R3AddrIn0_sig));
-    ConfigCell #(1) RfC0R3AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R3AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R3AddrIn0_config),
         .ConfigOut(RfC0R3AddrOut0_config),
         .select(RfC0R3AddrOut0_sig));
-    ConfigCell #(1) RfC0R3AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC0R3AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R3AddrOut0_config),
         .ConfigOut(RfC0R3AddrOut1_config),
         .select(RfC0R3AddrOut1_sig));
-    ConfigCell #(1) RfC0R3WE (//-------------------------------------------1
+    ConfigCell #(1) RfC0R3WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R3AddrOut1_config),
         .ConfigOut(RfC0R3WE_config),
         .select(RfC0R3WE_sig));
-    ConfigCell #(1) RfC1R1AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R1AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC0R3WE_config),
         .ConfigOut(RfC1R1AddrIn0_config),
         .select(RfC1R1AddrIn0_sig));
-    ConfigCell #(1) RfC1R1AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R1AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R1AddrIn0_config),
         .ConfigOut(RfC1R1AddrOut0_config),
         .select(RfC1R1AddrOut0_sig));
-    ConfigCell #(1) RfC1R1AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R1AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R1AddrOut0_config),
         .ConfigOut(RfC1R1AddrOut1_config),
         .select(RfC1R1AddrOut1_sig));
-    ConfigCell #(1) RfC1R1WE (//-------------------------------------------1
+    ConfigCell #(1) RfC1R1WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R1AddrOut1_config),
         .ConfigOut(RfC1R1WE_config),
         .select(RfC1R1WE_sig));
-    ConfigCell #(1) RfC1R2AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R2AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R1WE_config),
         .ConfigOut(RfC1R2AddrIn0_config),
         .select(RfC1R2AddrIn0_sig));
-    ConfigCell #(1) RfC1R2AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R2AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R2AddrIn0_config),
         .ConfigOut(RfC1R2AddrOut0_config),
         .select(RfC1R2AddrOut0_sig));
-    ConfigCell #(1) RfC1R2AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R2AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R2AddrOut0_config),
         .ConfigOut(RfC1R2AddrOut1_config),
         .select(RfC1R2AddrOut1_sig));
-    ConfigCell #(1) RfC1R2WE (//-------------------------------------------1
+    ConfigCell #(1) RfC1R2WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R2AddrOut1_config),
         .ConfigOut(RfC1R2WE_config),
         .select(RfC1R2WE_sig));
-    ConfigCell #(1) RfC1R3AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R3AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R2WE_config),
         .ConfigOut(RfC1R3AddrIn0_config),
         .select(RfC1R3AddrIn0_sig));
-    ConfigCell #(1) RfC1R3AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R3AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R3AddrIn0_config),
         .ConfigOut(RfC1R3AddrOut0_config),
         .select(RfC1R3AddrOut0_sig));
-    ConfigCell #(1) RfC1R3AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC1R3AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R3AddrOut0_config),
         .ConfigOut(RfC1R3AddrOut1_config),
         .select(RfC1R3AddrOut1_sig));
-    ConfigCell #(1) RfC1R3WE (//-------------------------------------------1
+    ConfigCell #(1) RfC1R3WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R3AddrOut1_config),
         .ConfigOut(RfC1R3WE_config),
         .select(RfC1R3WE_sig));
-    ConfigCell #(1) RfC2R1AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R1AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC1R3WE_config),
         .ConfigOut(RfC2R1AddrIn0_config),
         .select(RfC2R1AddrIn0_sig));
-    ConfigCell #(1) RfC2R1AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R1AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R1AddrIn0_config),
         .ConfigOut(RfC2R1AddrOut0_config),
         .select(RfC2R1AddrOut0_sig));
-    ConfigCell #(1) RfC2R1AddrOut1 (//xxxx
+    ConfigCell #(1) RfC2R1AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R1AddrOut0_config),
         .ConfigOut(RfC2R1AddrOut1_config),
         .select(RfC2R1AddrOut1_sig));
-    ConfigCell #(1) RfC2R1WE (//-------------------------------------------1
+    ConfigCell #(1) RfC2R1WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R1AddrOut1_config),
         .ConfigOut(RfC2R1WE_config),
         .select(RfC2R1WE_sig));
-    ConfigCell #(1) RfC2R2AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R2AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R1WE_config),
         .ConfigOut(RfC2R2AddrIn0_config),
         .select(RfC2R2AddrIn0_sig));
-    ConfigCell #(1) RfC2R2AddrOut0 (//Trouble maker !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    ConfigCell #(1) RfC2R2AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R2AddrIn0_config),
         .ConfigOut(RfC2R2AddrOut0_config),
         .select(RfC2R2AddrOut0_sig));
-    ConfigCell #(1) RfC2R2AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R2AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R2AddrOut0_config),
         .ConfigOut(RfC2R2AddrOut1_config),
         .select(RfC2R2AddrOut1_sig));
-    ConfigCell RfC2R2WE (//-------------------------------------------1
+    ConfigCell #(1) RfC2R2WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R2AddrOut1_config),
         .ConfigOut(RfC2R2WE_config),
         .select(RfC2R2WE_sig));
-    ConfigCell #(1) RfC2R3AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R3AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R2WE_config),
         .ConfigOut(RfC2R3AddrIn0_config),
         .select(RfC2R3AddrIn0_sig));
-    ConfigCell #(1) RfC2R3AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R3AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R3AddrIn0_config),
         .ConfigOut(RfC2R3AddrOut0_config),
         .select(RfC2R3AddrOut0_sig));
-    ConfigCell #(1) RfC2R3AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC2R3AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R3AddrOut0_config),
         .ConfigOut(RfC2R3AddrOut1_config),
         .select(RfC2R3AddrOut1_sig));
-    ConfigCell #(1) RfC2R3WE (//-------------------------------------------1
+    ConfigCell #(1) RfC2R3WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R3AddrOut1_config),
         .ConfigOut(RfC2R3WE_config),
         .select(RfC2R3WE_sig));
-    ConfigCell #(1) RfC3R1AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R1AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC2R3WE_config),
         .ConfigOut(RfC3R1AddrIn0_config),
         .select(RfC3R1AddrIn0_sig));
-    ConfigCell #(1) RfC3R1AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R1AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R1AddrIn0_config),
         .ConfigOut(RfC3R1AddrOut0_config),
         .select(RfC3R1AddrOut0_sig));
-    ConfigCell #(1) RfC3R1AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R1AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R1AddrOut0_config),
         .ConfigOut(RfC3R1AddrOut1_config),
         .select(RfC3R1AddrOut1_sig));
-    ConfigCell #(1) RfC3R1WE (//-------------------------------------------1
+    ConfigCell #(1) RfC3R1WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R1AddrOut1_config),
         .ConfigOut(RfC3R1WE_config),
         .select(RfC3R1WE_sig));
-    ConfigCell #(1) RfC3R2AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R2AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R1WE_config),
         .ConfigOut(RfC3R2AddrIn0_config),
         .select(RfC3R2AddrIn0_sig));
-    ConfigCell #(1) RfC3R2AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R2AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R2AddrIn0_config),
         .ConfigOut(RfC3R2AddrOut0_config),
         .select(RfC3R2AddrOut0_sig));
-    ConfigCell #(1) RfC3R2AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R2AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R2AddrOut0_config),
         .ConfigOut(RfC3R2AddrOut1_config),
         .select(RfC3R2AddrOut1_sig));
-    ConfigCell #(1) RfC3R2WE (//-------------------------------------------1
+    ConfigCell #(1) RfC3R2WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R2AddrOut1_config),
         .ConfigOut(RfC3R2WE_config),
         .select(RfC3R2WE_sig));
-    ConfigCell #(1) RfC3R3AddrIn0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R3AddrIn0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R2WE_config),
         .ConfigOut(RfC3R3AddrIn0_config),
         .select(RfC3R3AddrIn0_sig));
-    ConfigCell #(1) RfC3R3AddrOut0 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R3AddrOut0 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R3AddrIn0_config),
         .ConfigOut(RfC3R3AddrOut0_config),
         .select(RfC3R3AddrOut0_sig));
-    ConfigCell #(1) RfC3R3AddrOut1 (//-------------------------------------------1
+    ConfigCell #(1) RfC3R3AddrOut1 (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R3AddrOut0_config),
         .ConfigOut(RfC3R3AddrOut1_config),
         .select(RfC3R3AddrOut1_sig));
-    ConfigCell #(1) RfC3R3WE (//-------------------------------------------1
+    ConfigCell #(1) RfC3R3WE (
         .Config_Clock(Config_Clock),
         .Config_Reset(Config_Reset),
         .ConfigIn(RfC3R3AddrOut1_config),
