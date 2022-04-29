@@ -186,7 +186,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, cgrame, cgra2x2, cgra6x6, stream2x2cgra)
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, cgrame, cgra2x2, cgra6x6, stream2x2cgra, stream6x6cgra)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -247,6 +247,12 @@ lazy val stream2x2cgra = (project in file("generators/stream2x2cgra"))
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 
+lazy val stream6x6cgra = (project in file("generators/stream6x6cgra"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
 lazy val cgra6x6 = (project in file("generators/cgra6x6"))
   .dependsOn(rocketchip, chisel_testers)
   .settings(libraryDependencies ++= rocketLibDeps.value)
@@ -272,7 +278,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard, cgrame, cgra2x2, cgra6x6, stream2x2cgra) // must depend on chipyard to get scala resources
+  .dependsOn(chisel_testers, chipyard, cgrame, cgra2x2, cgra6x6, stream2x2cgra, stream6x6cgra) // must depend on chipyard to get scala resources
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 

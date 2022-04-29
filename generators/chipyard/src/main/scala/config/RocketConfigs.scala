@@ -140,6 +140,13 @@ class stream2x2cgraRocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: stream2x2CgraRocket
 
+// DOC include start: stream6x6CgraRocket
+class stream6x6cgraRocketConfig extends Config(
+  new stream6x6cgra.Withstream6x6cgraAccel ++				    // add stream6x6cgra
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: stream6x6CgraRocket
+
 // DOC include start: Cgra6x6Rocket
 class Cgra6x6RocketConfig extends Config(
   new cgra6x6.WithCgra6x6Accel ++				    // add cgra6x6

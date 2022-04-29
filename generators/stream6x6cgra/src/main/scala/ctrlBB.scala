@@ -1,4 +1,4 @@
-package stream2x2cgra
+package stream6x6cgra
 
 import Chisel._
 import scala.collection.mutable.ArrayBuffer
@@ -12,8 +12,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   with HasCoreParameters
   with MemoryOpConstants {
 
-  val arraySize = 2
-  val bufferSize = 5
+  val arraySize = 6
 
   val io = new Bundle {
     val rocc_req_val      = Bool(INPUT)
@@ -45,16 +44,24 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
     //CGRA specific -------------------------
     val CGRA_Clock        = Bool(OUTPUT)
+    val CGRA_Reset        = Bool(OUTPUT)
     val Config_Reset      = Bool(OUTPUT)
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
     val cgra_Outconfig    = Bool(INPUT)
-    val write0            = Bits(OUTPUT)
-    val write1            = Bits(OUTPUT)
+    val write             = Bits(OUTPUT)
     val from_cgra0        = Bits(INPUT, 32)
     val from_cgra1        = Bits(INPUT, 32)
-    val to_cgra0          = Bits(OUTPUT,32)
-    val to_cgra1          = Bits(OUTPUT,32)
+    val from_cgra2        = Bits(INPUT, 32)
+    val from_cgra3        = Bits(INPUT, 32)
+    val from_cgra4        = Bits(INPUT, 32)
+    val from_cgra5        = Bits(INPUT, 32)
+    val to_cgra0          = Bits(OUTPUT, 32)
+    val to_cgra1          = Bits(OUTPUT, 32)
+    val to_cgra2          = Bits(OUTPUT, 32)
+    val to_cgra3          = Bits(OUTPUT, 32)
+    val to_cgra4          = Bits(OUTPUT, 32)
+    val to_cgra5          = Bits(OUTPUT, 32)
 
     val write_rq0         = Bool(INPUT)
     val from_mem0         = Bits(OUTPUT,32)
@@ -65,6 +72,26 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val from_mem1         = Bits(OUTPUT,32)
     val to_mem1           = Bits(INPUT, 32)
     val addr1             = Bits(INPUT, 32)
+
+        val write_rq2         = Bool(INPUT)
+    val from_mem2         = Bits(OUTPUT,  32)
+    val to_mem2           = Bits(INPUT,   32)
+    val addr2             = Bits(INPUT,   32)
+
+    val write_rq3         = Bool(INPUT)
+    val from_mem3         = Bits(OUTPUT,  32)
+    val to_mem3           = Bits(INPUT,   32)
+    val addr3             = Bits(INPUT,   32)
+
+    val write_rq4         = Bool(INPUT)
+    val from_mem4         = Bits(OUTPUT,  32)
+    val to_mem4           = Bits(INPUT,   32)
+    val addr4             = Bits(INPUT,   32)
+
+    val write_rq5         = Bool(INPUT)
+    val from_mem5         = Bits(OUTPUT,  32)
+    val to_mem5           = Bits(INPUT,   32)
+    val addr5             = Bits(INPUT,   32)
   }
   //RoCC HANDLER
   //rocc pipe state
@@ -88,7 +115,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val busy              = Reg(init = Bool(false))
   val interrupt         = Reg(init = Bool(false))
 
-  val cgra_config       = Reg(init = Vec.fill(14) { 0.U(64.W) })
+  val cgra_config       = Reg(init = Vec.fill(31) { 0.U(64.W) })
   val config_clock_en   = Reg(init = Bool(false))
   val cgra_clock_en     = Reg(init = Bool(false))
 
@@ -114,8 +141,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val last_address      = Reg(init = UInt(0,39))
   val tag               = Reg(init = Bits(0,5))
   val done_calculating  = Reg(init = Bool(false))
+  
   //default
-
+  io.CGRA_Reset         := false.B
   io.Config_Reset       := false.B
   config_clock_en       := false.B
   io.rocc_req_rdy       := false.B
@@ -132,25 +160,34 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
   io.to_cgra0           := UInt(0)
   io.to_cgra1           := UInt(0)
-  io.write0             := UInt(0)
-  io.write1             := UInt(0)
+  io.to_cgra2           := UInt(0)
+  io.to_cgra3           := UInt(0)
+  io.to_cgra4           := UInt(0)
+  io.to_cgra5           := UInt(0)
+  io.write              := UInt(0)
 
   write_rq_vec(0)       := io.write_rq0
   write_rq_vec(1)       := io.write_rq1
+  write_rq_vec(2)       := io.write_rq2
+  write_rq_vec(3)       := io.write_rq3
+  write_rq_vec(4)       := io.write_rq4
+  write_rq_vec(5)       := io.write_rq5
+
   clock_reg             := !clock_reg
-  
   io.Config_Clock       := Mux(config_clock_en, clock_reg   , Bool(false))
   io.CGRA_Clock         := Mux(cgra_clock_en  , clock.asBool, Bool(false))
 
   when(clock_reg){
     sampling_clock  := !sampling_clock
   }
-  /* instruction			roccinst	src2		    src1	      dst	  custom-N
-  configure			      0					-	          config	    -	    0
-  one input&output	  0			    src2(O)		  src1(I)	    -	    1 output = src2, input = src1
-  input #2			      0					src1(I)		  -           -     2 (Used when we have two inputs)
-  input length #2|#1	0			    src2(lenI2)	src1(lenI1)	-     3
+  /* instruction		    roccinst	src1		      src2	          dst	  custom-N
+  configure			        0			    config        config	        -	    0
+  one input&output	    0			    src1(O)		    src2(O)	        -	    1 output = src2, input = src1
+  input #2			        0			    src2(I)		    -               -     2 (Used when we have two inputs)
+  input length #1	      0			    src1(lenI1)	  0         	    -     3
 
+
+  * ROCC_INSTRUCTION_SS(0,src1,src2, instruction)
   * configure: configure the CGRA with a mapping (`busy` while configuring)
   * one input: when the configuration demands a single input (pointer)
   * two inputs: setup two inputs for the configuration
@@ -170,7 +207,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
           cgra_config(received_vec)   := Reverse(io.rocc_rs1)
           cgra_config(received_vec+1) := Reverse(io.rocc_rs2)
           received_vec                := received_vec + 2
-          when(received_vec===UInt(2)){
+          when(received_vec===UInt(28)){
             state         := s_CGRA_config
             busy          := true.B
             received_vec  := 0
@@ -218,7 +255,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         k := 0
         j := j + 1
       }
-      when(j === UInt(3) && k === UInt(32)){
+      when(j === UInt(29) && k === UInt(32)){
         state           := s_finished
         mem_s           := m_idle
         config_clock_en := false.B
@@ -233,7 +270,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
   } //end state
   val memory_data = Reg(init = UInt(0,32))
-  io.from_mem1    := memory_data
+  io.from_mem0    := memory_data
 
   switch(cgra_state){
     is(c_idle){
@@ -241,23 +278,23 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       address_counter := 0
     }
     is(c_get_address){
-      when(io.addr1 =/= last_address && address_counter =/= input_len(1)){
+      when(io.addr0 =/= last_address && address_counter =/= input_len(1)){
         address_counter := address_counter + 1
         io.mem_req_val  := true.B
-        io.mem_req_addr := input1_adress.asUInt + io.addr1.asUInt - 4
+        io.mem_req_addr := input1_adress.asUInt + io.addr0.asUInt - 4
         io.mem_req_tag  := tag
         io.mem_req_cmd  := M_XRD
         io.mem_req_size := log2Ceil(32).U
         cgra_clock_en   := false.B
         when(io.mem_req_rdy){
           cgra_state    := c_fetch_data
-          last_address  :=  io.addr1
+          last_address  :=  io.addr0
         }
       }
     }
     is(c_fetch_data){
       when(io.mem_resp_val && io.mem_resp_tag === tag){
-        io.from_mem1    := io.mem_resp_data
+        io.from_mem0    := io.mem_resp_data
         memory_data     := io.mem_resp_data
         cgra_clock_en   := true.B
         cgra_state      := c_get_address
@@ -266,12 +303,12 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
   }
   
-  when((io.from_cgra1 =/= output_data) && !done_calculating){
+  when((io.from_cgra5 =/= output_data) && !done_calculating){
     sampling_en   := true.B
   }
-  when((sampling_en && io.addr1 =/= last_address && (output_counter =/= input_len(1)))){
+  when((sampling_en && io.addr0 =/= last_address && (output_counter =/= input_len(1)))){
     output_counter  := output_counter + 1
-    output_data     := io.from_cgra1
+    output_data     := io.from_cgra5
   }.elsewhen(sampling_en && (output_counter === input_len(1))){
     when(has_output){
       mem_s       := m_write_output

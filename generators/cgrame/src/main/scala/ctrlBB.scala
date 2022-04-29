@@ -200,12 +200,14 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   // }
 
 
-  /* instruction			roccinst	src2		    src1	      dst	  custom-N
-  configure			      0					-	          config	    -	    0
-  one input&output	  0			    src2(O)		  src1(I)	    -	    1 output = src2, input = src1
-  input #2			      0					src1(I)		  -           -     2 (Used when we have two inputs)
-  input length #2|#1	0			    src2(lenI2)	src1(lenI1)	-     3
+  /* instruction		    roccinst	src1		      src2	          dst	  custom-N
+  configure			        0			    config        config	        -	    0
+  one input&output	    0			    src1(O)		    src2(O)	        -	    1 output = src2, input = src1
+  input #2			        0			    src2(I)		    -               -     2 (Used when we have two inputs)
+  input length #1	      0			    src1(lenI1)	  0         	    -     3
 
+
+  * ROCC_INSTRUCTION_SS(0,src1,src2, instruction)
   * configure: configure the CGRA with a mapping (`busy` while configuring)
   * one input: when the configuration demands a single input (pointer)
   * two inputs: setup two inputs for the configuration
@@ -215,6 +217,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   It's based on the following roccinst+opcode->RISC-V mapping:
   funct7		rs2		rs1		xd	xs1	xs2	rd	opcode
   roccinst	src2	src1				dst	custom-0/1/2/3 */
+
 
   switch(rocc_s) {
     is(r_idle) {
@@ -480,27 +483,13 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
 /* 
 psuedo kode
-Få konfig fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
-Få inputs fra CPU via RoCC 
-Få output addresser fra CPU
-Configurere cgra
-Mate cgra med input
+Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
+configurere CGRA
+
+Få input og output pointer fra CPU via RoCC 
+evt input 2 fra CPU
+
+FÅ lengde på kalkulasjon
+
 skrive output til minne/ sende tilbake til CPU
  */
-
-/* Fra Lasse:
-Hva trenger akseleratoren, i hvilken rekkefølge skal ting komme i?
-Planen er at akseleratoren skal:
-1. konfigureres. Her har du x antall bits som mates til akseleratoren samtidig som config-signalet er høyt.
-2. beregne. Her får du 1 eller 2 inputs og 1 output/return (ikke helt bestemt enda). Når lengden på input er satt, så starter beregningen og cgra-en er "busy".
- 
-Hva trenger akseleratoren fra CPU og hva må være forhåndskompilert?
-Den må ha config og peker til inputs og outputs og lengde på det samme.
-Det som er konstant for cgra-en er design/verilog.
-Det som er dynamisk er konfigurasjonen, det som bestemmer hvor data skal internt i cgra-en og hvilke funksjoner nodene skal ha. NoC og prosesseringselement (PE) skal programmeres hver kjøring/konfigurasjon.
-Og videre er også hvert program dynamisk som i at inputs og outputs kan være forskjellige adresser i minnet.
- 
-Må CGRAm-BlackBox snakke direkte til minne eller får den det den trenger fra CPU?
-Den må snakke med minnet.
-Noder i cgra-en kan hete "Load" og de nodene må hente data fra minnet.
- */ 
