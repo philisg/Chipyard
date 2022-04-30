@@ -448,7 +448,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
   } //end mem_s
 }
-
 /* 
 psuedo kode
 Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)

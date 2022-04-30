@@ -119,12 +119,12 @@ class Sha3RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: Sha3Rocket
 
-// DOC include start: CgrameRocket
-class CgrameRocketConfig extends Config(
-  new cgrame.WithCgrameAccel ++				    // add cgrame
+// DOC include start: Cgra4x3Rocket
+class Cgra4x3RocketConfig extends Config(
+  new cgra4x3.WithCgra4x3Accel ++				    // add cgra4x3
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
-// DOC include end: CgrameRocket
+// DOC include end: Cgra4x3Rocket
 
 // DOC include start: Cgra2x2Rocket
 class Cgra2x2RocketConfig extends Config(
@@ -139,6 +139,13 @@ class stream2x2cgraRocketConfig extends Config(
   new freechips.rocketchip.subsystem.WithNBigCores(1) ++
   new chipyard.config.AbstractConfig)
 // DOC include end: stream2x2CgraRocket
+
+// DOC include start: stream4x3CgraRocket
+class stream4x3cgraRocketConfig extends Config(
+  new stream4x3cgra.Withstream4x3cgraAccel ++				    // add stream4x3cgra
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: stream4x3CgraRocket
 
 // DOC include start: stream6x6CgraRocket
 class stream6x6cgraRocketConfig extends Config(
