@@ -101,9 +101,9 @@ class stream4x3cgraAccel(opcodes: OpcodeSet)(implicit p: Parameters) extends Laz
 
 class stream4x3cgraAccelImp(outer: stream4x3cgraAccel)(implicit p: Parameters) extends LazyRoCCModuleImp(outer){
   
-  val stream4x3cgrabb    = Module(new Cgra4x3BlackBox)
-  val ctrl        = Module(new CtrlBBModule)
-  val cmd         = Queue(io.cmd)
+  val stream4x3cgrabb   = Module(new Cgra4x3BlackBox)
+  val ctrl              = Module(new CtrlBBModule)
+  val cmd               = Queue(io.cmd)
 
   //RoCC
   io.resp.valid         <> ctrl.io.rocc_resp_val
@@ -120,35 +120,34 @@ class stream4x3cgraAccelImp(outer: stream4x3cgraAccel)(implicit p: Parameters) e
   io.interrupt          <> ctrl.io.interrupt     
 
   //CGRA IO
-  // stream4x3cgrabb.io.CGRA_Clock    := clock
-  stream4x3cgrabb.io.CGRA_Clock    := ctrl.io.CGRA_Clock
-  stream4x3cgrabb.io.Config_Clock  := ctrl.io.Config_Clock
-  stream4x3cgrabb.io.CGRA_Reset    := reset
-  stream4x3cgrabb.io.Config_Reset  := ctrl.io.Config_Reset
-  stream4x3cgrabb.io.ConfigIn      := ctrl.io.cgra_Inconfig
-  stream4x3cgrabb.io.write0        := ctrl.io.write0
-  stream4x3cgrabb.io.write1        := ctrl.io.write1
-  stream4x3cgrabb.io.write2        := ctrl.io.write2
-  stream4x3cgrabb.io.write3        := ctrl.io.write3
-  ctrl.io.cgra_Outconfig    := stream4x3cgrabb.io.ConfigOut
-  ctrl.io.from_cgra0        <> stream4x3cgrabb.io.dataOut0
-  ctrl.io.from_cgra1        <> stream4x3cgrabb.io.dataOut1
-  ctrl.io.from_cgra2        <> stream4x3cgrabb.io.dataOut2
-  ctrl.io.from_cgra3        <> stream4x3cgrabb.io.dataOut3
-  stream4x3cgrabb.io.dataIn0       := ctrl.io.to_cgra0
-  stream4x3cgrabb.io.dataIn1       := ctrl.io.to_cgra1
-  stream4x3cgrabb.io.dataIn2       := ctrl.io.to_cgra2
-  stream4x3cgrabb.io.dataIn3       := ctrl.io.to_cgra3
+  stream4x3cgrabb.io.CGRA_Clock     := ctrl.io.CGRA_Clock
+  stream4x3cgrabb.io.Config_Clock   := ctrl.io.Config_Clock
+  stream4x3cgrabb.io.CGRA_Reset     := reset
+  stream4x3cgrabb.io.Config_Reset   := ctrl.io.Config_Reset
+  stream4x3cgrabb.io.ConfigIn       := ctrl.io.cgra_Inconfig
+  stream4x3cgrabb.io.write0         := ctrl.io.write0
+  stream4x3cgrabb.io.write1         := ctrl.io.write1
+  stream4x3cgrabb.io.write2         := ctrl.io.write2
+  stream4x3cgrabb.io.write3         := ctrl.io.write3
+  ctrl.io.cgra_Outconfig            := stream4x3cgrabb.io.ConfigOut
+  ctrl.io.from_cgra0                <> stream4x3cgrabb.io.dataOut0
+  ctrl.io.from_cgra1                <> stream4x3cgrabb.io.dataOut1
+  ctrl.io.from_cgra2                <> stream4x3cgrabb.io.dataOut2
+  ctrl.io.from_cgra3                <> stream4x3cgrabb.io.dataOut3
+  stream4x3cgrabb.io.dataIn0        := ctrl.io.to_cgra0
+  stream4x3cgrabb.io.dataIn1        := ctrl.io.to_cgra1
+  stream4x3cgrabb.io.dataIn2        := ctrl.io.to_cgra2
+  stream4x3cgrabb.io.dataIn3        := ctrl.io.to_cgra3
 
-  ctrl.io.write_rq0     := stream4x3cgrabb.io.write_rq0
-  ctrl.io.write_rq1     := stream4x3cgrabb.io.write_rq1
-  ctrl.io.write_rq2     := stream4x3cgrabb.io.write_rq2
-  ctrl.io.to_mem0       := stream4x3cgrabb.io.to_mem0
-  ctrl.io.to_mem1       := stream4x3cgrabb.io.to_mem1
-  ctrl.io.to_mem2       := stream4x3cgrabb.io.to_mem2
-  ctrl.io.addr0         := stream4x3cgrabb.io.addr0
-  ctrl.io.addr1         := stream4x3cgrabb.io.addr1
-  ctrl.io.addr2         := stream4x3cgrabb.io.addr2
+  ctrl.io.write_rq0                 := stream4x3cgrabb.io.write_rq0
+  ctrl.io.write_rq1                 := stream4x3cgrabb.io.write_rq1
+  ctrl.io.write_rq2                 := stream4x3cgrabb.io.write_rq2
+  ctrl.io.to_mem0                   := stream4x3cgrabb.io.to_mem0
+  ctrl.io.to_mem1                   := stream4x3cgrabb.io.to_mem1
+  ctrl.io.to_mem2                   := stream4x3cgrabb.io.to_mem2
+  ctrl.io.addr0                     := stream4x3cgrabb.io.addr0
+  ctrl.io.addr1                     := stream4x3cgrabb.io.addr1
+  ctrl.io.addr2                     := stream4x3cgrabb.io.addr2
   stream4x3cgrabb.io.from_mem0 := ctrl.io.from_mem0
   stream4x3cgrabb.io.from_mem1 := ctrl.io.from_mem1
   stream4x3cgrabb.io.from_mem2 := ctrl.io.from_mem2

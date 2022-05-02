@@ -18,7 +18,12 @@ module Cgra6x6BlackBox(
             dataOut3,
             dataOut4,
             dataOut5,
-            write,
+            write0,
+            write1,
+            write2,
+            write3,
+            write4,
+            write5,
             write_rq0,
             from_mem0,
             to_mem0,
@@ -80,7 +85,12 @@ module Cgra6x6BlackBox(
     wire [31:0] ext_io_top_4;
     wire [31:0] ext_io_top_5;
 
-    input write;
+    input write0;
+    input write1;
+    input write2;
+    input write3;
+    input write4;
+    input write5;
     input [31:0] dataIn0;
     input [31:0] dataIn1;
     input [31:0] dataIn2;
@@ -94,12 +104,12 @@ module Cgra6x6BlackBox(
     output [31:0] dataOut4;
     output [31:0] dataOut5;
 
-    assign ext_io_top_0 = write? dataIn0 : 32'dz;
-    assign ext_io_top_1 = write? dataIn1 : 32'dz;
-    assign ext_io_top_2 = write? dataIn2 : 32'dz;
-    assign ext_io_top_3 = write? dataIn3 : 32'dz;
-    assign ext_io_top_4 = write? dataIn4 : 32'dz;
-    assign ext_io_top_5 = write? dataIn5 : 32'dz;
+    assign ext_io_top_0 = write0? dataIn0 : 32'dz;
+    assign ext_io_top_1 = write1? dataIn1 : 32'dz;
+    assign ext_io_top_2 = write2? dataIn2 : 32'dz;
+    assign ext_io_top_3 = write3? dataIn3 : 32'dz;
+    assign ext_io_top_4 = write4? dataIn4 : 32'dz;
+    assign ext_io_top_5 = write5? dataIn5 : 32'dz;
     assign dataOut0 = ext_io_top_0;
     assign dataOut1 = ext_io_top_1;
     assign dataOut2 = ext_io_top_2;

@@ -50,7 +50,12 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
     val cgra_Outconfig    = Bool(INPUT)
-    val write             = Bits(OUTPUT)
+    val write0            = Bits(OUTPUT)
+    val write1            = Bits(OUTPUT)
+    val write2            = Bits(OUTPUT)
+    val write3            = Bits(OUTPUT)
+    val write4            = Bits(OUTPUT)
+    val write5            = Bits(OUTPUT)
     val from_cgra0        = Bits(INPUT, 32)
     val from_cgra1        = Bits(INPUT, 32)
     val from_cgra2        = Bits(INPUT, 32)
@@ -175,7 +180,12 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   io.to_cgra3           := UInt(0)
   io.to_cgra4           := UInt(0)
   io.to_cgra5           := UInt(0)
-  io.write              := UInt(0)
+  io.write0             := UInt(0)
+  io.write1             := UInt(0)
+  io.write2             := UInt(0)
+  io.write3             := UInt(0)
+  io.write4             := UInt(0)
+  io.write5             := UInt(0)
 
   write_rq_vec(0)       := io.write_rq0
   write_rq_vec(1)       := io.write_rq1

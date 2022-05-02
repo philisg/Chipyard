@@ -33,7 +33,12 @@ class Cgra6x6BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxR
 	  val CGRA_Clock = Input(Bool())
 	  val CGRA_Reset = Input(Bool())
     
-    val write     = Input(Bool())
+    val write0    = Input(Bool())
+    val write1    = Input(Bool())
+    val write2    = Input(Bool())
+    val write3    = Input(Bool())
+    val write4    = Input(Bool())
+    val write5    = Input(Bool())
       // Chisel Analog => Verilog inout
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
@@ -156,6 +161,12 @@ class stream6x6cgraAccelImp(outer: stream6x6cgraAccel)(implicit p: Parameters) e
   cgra6x6bb.io.dataIn3      := ctrl.io.to_cgra3
   cgra6x6bb.io.dataIn4      := ctrl.io.to_cgra4
   cgra6x6bb.io.dataIn5      := ctrl.io.to_cgra5
+  cgra6x6bb.io.write0       := ctrl.io.write0
+  cgra6x6bb.io.write1       := ctrl.io.write1
+  cgra6x6bb.io.write2       := ctrl.io.write2
+  cgra6x6bb.io.write3       := ctrl.io.write3
+  cgra6x6bb.io.write4       := ctrl.io.write4
+  cgra6x6bb.io.write5       := ctrl.io.write5
 
   ctrl.io.write_rq0       := cgra6x6bb.io.write_rq0
   ctrl.io.write_rq1       := cgra6x6bb.io.write_rq1

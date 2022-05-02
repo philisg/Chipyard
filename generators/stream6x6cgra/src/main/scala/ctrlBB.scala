@@ -12,8 +12,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   with HasCoreParameters
   with MemoryOpConstants {
 
-  val arraySize = 6
-
   val io = new Bundle {
     val rocc_req_val      = Bool(INPUT)
     val rocc_req_rdy      = Bool(OUTPUT)
@@ -49,19 +47,24 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
     val cgra_Outconfig    = Bool(INPUT)
-    val write             = Bits(OUTPUT)
+    val write0            = Bits(OUTPUT)
+    val write1            = Bits(OUTPUT)
+    val write2            = Bits(OUTPUT)
+    val write3            = Bits(OUTPUT)
+    val write4            = Bits(OUTPUT)
+    val write5            = Bits(OUTPUT)
     val from_cgra0        = Bits(INPUT, 32)
     val from_cgra1        = Bits(INPUT, 32)
     val from_cgra2        = Bits(INPUT, 32)
     val from_cgra3        = Bits(INPUT, 32)
     val from_cgra4        = Bits(INPUT, 32)
     val from_cgra5        = Bits(INPUT, 32)
-    val to_cgra0          = Bits(OUTPUT, 32)
-    val to_cgra1          = Bits(OUTPUT, 32)
-    val to_cgra2          = Bits(OUTPUT, 32)
-    val to_cgra3          = Bits(OUTPUT, 32)
-    val to_cgra4          = Bits(OUTPUT, 32)
-    val to_cgra5          = Bits(OUTPUT, 32)
+    val to_cgra0          = Bits(OUTPUT,32)
+    val to_cgra1          = Bits(OUTPUT,32)
+    val to_cgra2          = Bits(OUTPUT,32)
+    val to_cgra3          = Bits(OUTPUT,32)
+    val to_cgra4          = Bits(OUTPUT,32)
+    val to_cgra5          = Bits(OUTPUT,32)
 
     val write_rq0         = Bool(INPUT)
     val from_mem0         = Bits(OUTPUT,32)
@@ -73,25 +76,25 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     val to_mem1           = Bits(INPUT, 32)
     val addr1             = Bits(INPUT, 32)
 
-        val write_rq2         = Bool(INPUT)
-    val from_mem2         = Bits(OUTPUT,  32)
-    val to_mem2           = Bits(INPUT,   32)
-    val addr2             = Bits(INPUT,   32)
+    val write_rq2         = Bool(INPUT)
+    val from_mem2         = Bits(OUTPUT,32)
+    val to_mem2           = Bits(INPUT, 32)
+    val addr2             = Bits(INPUT, 32)
 
     val write_rq3         = Bool(INPUT)
-    val from_mem3         = Bits(OUTPUT,  32)
-    val to_mem3           = Bits(INPUT,   32)
-    val addr3             = Bits(INPUT,   32)
+    val from_mem3         = Bits(OUTPUT,32)
+    val to_mem3           = Bits(INPUT, 32)
+    val addr3             = Bits(INPUT, 32)
 
     val write_rq4         = Bool(INPUT)
-    val from_mem4         = Bits(OUTPUT,  32)
-    val to_mem4           = Bits(INPUT,   32)
-    val addr4             = Bits(INPUT,   32)
+    val from_mem4         = Bits(OUTPUT,32)
+    val to_mem4           = Bits(INPUT, 32)
+    val addr4             = Bits(INPUT, 32)
 
     val write_rq5         = Bool(INPUT)
-    val from_mem5         = Bits(OUTPUT,  32)
-    val to_mem5           = Bits(INPUT,   32)
-    val addr5             = Bits(INPUT,   32)
+    val from_mem5         = Bits(OUTPUT,32)
+    val to_mem5           = Bits(INPUT, 32)
+    val addr5             = Bits(INPUT, 32)
   }
   //RoCC HANDLER
   //rocc pipe state
@@ -128,7 +131,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val received_vec      = Reg(init = Bits(0,32))
   val clock_reg         = Reg(init = Bool(false))
   val sampling_clock    = Reg(init = Bool(false))
-  val write_rq_vec      = Reg(init = Vec.fill(arraySize) { Bool(false)})
   val output_adress     = Reg(init = UInt(0,39))
   val input1_adress     = Reg(init = UInt(0,39))
   val input2_adress     = Reg(init = UInt(0,39))
@@ -164,14 +166,13 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   io.to_cgra3           := UInt(0)
   io.to_cgra4           := UInt(0)
   io.to_cgra5           := UInt(0)
-  io.write              := UInt(0)
+  io.write0             := UInt(0)
+  io.write1             := UInt(0)
+  io.write2             := UInt(0)
+  io.write3             := UInt(0)
+  io.write4             := UInt(0)
+  io.write5             := UInt(0)
 
-  write_rq_vec(0)       := io.write_rq0
-  write_rq_vec(1)       := io.write_rq1
-  write_rq_vec(2)       := io.write_rq2
-  write_rq_vec(3)       := io.write_rq3
-  write_rq_vec(4)       := io.write_rq4
-  write_rq_vec(5)       := io.write_rq5
 
   clock_reg             := !clock_reg
   io.Config_Clock       := Mux(config_clock_en, clock_reg   , Bool(false))
@@ -356,4 +357,3 @@ FÅ lengde på kalkulasjon
 
 skrive output til minne/ sende tilbake til CPU
  */
-

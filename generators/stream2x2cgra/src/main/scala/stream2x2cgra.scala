@@ -35,7 +35,7 @@ class Cgra2x2BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxR
     
     val write0     = Input(UInt(1.W))
     val write1     = Input(UInt(1.W))
-      // Chisel Analog => Verilog inout
+
     val dataIn0   = Input(UInt(32.W))
     val dataIn1   = Input(UInt(32.W))
     val dataOut0  = Output(UInt(32.W))
@@ -60,7 +60,6 @@ class Cgra2x2BlackBox(implicit p: Parameters) extends BlackBox with HasBlackBoxR
   addResource("/func_32b_add_multiply_sub_divide_and_or_xor_shl_ashr_lshr.v")
   addResource("/ConfigCell.v")
   addResource("/io_32b.v")
-  // addResource("/memUnit_32b.v")
   addResource("/memoryPort_2connect_32b.v")
   addResource("/mux_2to1_32b.v")
   addResource("/mux_4to1_32b.v")
@@ -146,17 +145,6 @@ class stream2x2cgraAccelImp(outer: stream2x2cgraAccel)(implicit p: Parameters) e
   }
 
   mem_ctrl(io.mem.req)
-
-  // io.mem.req.valid             := ctrl.io.mem_req_val
-  // ctrl.io.mem_req_rdy          := io.mem.req.ready
-  // io.mem.req.bits.tag          := ctrl.io.mem_req_tag
-  // io.mem.req.bits.addr         := ctrl.io.mem_req_addr
-  // io.mem.req.bits.cmd          := ctrl.io.mem_req_cmd
-  // io.mem.req.bits.size         := ctrl.io.mem_req_size
-  // io.mem.req.bits.data         := ctrl.io.mem_req_data
-  // io.mem.req.bits.signed       := Bool(false)
-  // io.mem.req.bits.phys         := Bool(false)
-  
   ctrl.io.mem_resp_val  <> io.mem.resp.valid
   ctrl.io.mem_resp_tag  <> io.mem.resp.bits.tag
   ctrl.io.mem_resp_data := io.mem.resp.bits.data

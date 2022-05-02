@@ -12,8 +12,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   with HasCoreParameters
   with MemoryOpConstants {
 
-  val arraySize = 4
-
   val io = new Bundle {
     val rocc_req_val      = Bool(INPUT)
     val rocc_req_rdy      = Bool(OUTPUT)

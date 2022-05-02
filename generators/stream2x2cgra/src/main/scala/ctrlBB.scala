@@ -12,9 +12,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   with HasCoreParameters
   with MemoryOpConstants {
 
-  val arraySize = 2
-  val bufferSize = 5
-
   val io = new Bundle {
     val rocc_req_val      = Bool(INPUT)
     val rocc_req_rdy      = Bool(OUTPUT)
@@ -45,6 +42,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
     //CGRA specific -------------------------
     val CGRA_Clock        = Bool(OUTPUT)
+    val CGRA_Reset        = Bool(OUTPUT)
     val Config_Reset      = Bool(OUTPUT)
     val Config_Clock      = Bool(OUTPUT)
     val cgra_Inconfig     = Bits(OUTPUT)
@@ -101,7 +99,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val received_vec      = Reg(init = Bits(0,32))
   val clock_reg         = Reg(init = Bool(false))
   val sampling_clock    = Reg(init = Bool(false))
-  val write_rq_vec      = Reg(init = Vec.fill(arraySize) { Bool(false)})
   val output_adress     = Reg(init = UInt(0,39))
   val input1_adress     = Reg(init = UInt(0,39))
   val input2_adress     = Reg(init = UInt(0,39))
@@ -114,8 +111,9 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val last_address      = Reg(init = UInt(0,39))
   val tag               = Reg(init = Bits(0,5))
   val done_calculating  = Reg(init = Bool(false))
-  //default
 
+  //default
+  io.CGRA_Reset         := false.B
   io.Config_Reset       := false.B
   config_clock_en       := false.B
   io.rocc_req_rdy       := false.B
@@ -135,22 +133,21 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   io.write0             := UInt(0)
   io.write1             := UInt(0)
 
-  write_rq_vec(0)       := io.write_rq0
-  write_rq_vec(1)       := io.write_rq1
   clock_reg             := !clock_reg
-  
   io.Config_Clock       := Mux(config_clock_en, clock_reg   , Bool(false))
   io.CGRA_Clock         := Mux(cgra_clock_en  , clock.asBool, Bool(false))
 
   when(clock_reg){
     sampling_clock  := !sampling_clock
   }
-  /* instruction			roccinst	src2		    src1	      dst	  custom-N
-  configure			      0					-	          config	    -	    0
-  one input&output	  0			    src2(O)		  src1(I)	    -	    1 output = src2, input = src1
-  input #2			      0					src1(I)		  -           -     2 (Used when we have two inputs)
-  input length #2|#1	0			    src2(lenI2)	src1(lenI1)	-     3
+  /* instruction		    roccinst	src1		      src2	          dst	  custom-N
+  configure			        0			    config        config	        -	    0
+  one input&output	    0			    src1(O)		    src2(O)	        -	    1 output = src2, input = src1
+  input #2			        0			    src2(I)		    -               -     2 (Used when we have two inputs)
+  input length #1	      0			    src1(lenI1)	  0         	    -     3
 
+
+  * ROCC_INSTRUCTION_SS(0,src1,src2, instruction)
   * configure: configure the CGRA with a mapping (`busy` while configuring)
   * one input: when the configuration demands a single input (pointer)
   * two inputs: setup two inputs for the configuration
@@ -319,4 +316,3 @@ FÅ lengde på kalkulasjon
 
 skrive output til minne/ sende tilbake til CPU
  */
-
