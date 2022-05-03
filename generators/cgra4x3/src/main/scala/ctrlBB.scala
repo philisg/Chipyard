@@ -91,7 +91,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
   val m_idle :: m_accum_address :: m_accum_data :: m_receive_data_from_mem :: m_send_data_to_cgra :: m_read_CGRA :: m_read :: m_wait_CGRA :: m_write_CGRA :: m_write_output :: Nil = Enum(UInt(), 10)
   val mem_s = Reg(init=m_idle)
 
-  val addr_buffer       = Reg(init = Vec.fill(3) { 0.U(39.W) })
   val input_len         = Reg(init = Vec.fill(3) { 0.U(64.W) })
   val busy              = Reg(init = Bool(false))
   val interrupt         = Reg(init = Bool(false))
@@ -235,7 +234,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
   }//end rocc_s
 
-
   switch(state){
     is(s_idle){
     }
@@ -360,10 +358,8 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
           when(!has_output){
             mem_s := m_idle
           }
-          // busy          := false.B
         }.otherwise{
           data_from_memory(0) := data_vec(send_counter)
-          // data_from_memory(5) := data_vec(send_counter+1)
           send_counter        := send_counter + 1
         }
       }
@@ -451,7 +447,6 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
     }
   } //end mem_s
 }
-
 /* 
 psuedo kode
 Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
