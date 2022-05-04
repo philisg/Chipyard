@@ -161,6 +161,28 @@ class Cgra6x6RocketConfig extends Config(
   new chipyard.config.AbstractConfig)
 // DOC include end: Cgra6x6Rocket
 
+
+// DOC include start: streamDouble2x2CgraRocket
+class streamDouble2x2cgraRocketConfig extends Config(
+  new streamDouble2x2cgra.WithstreamDouble2x2cgraAccel ++				    // add streamDouble2x2cgra
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: streamDouble2x2CgraRocket
+
+// DOC include start: streamDouble4x3CgraRocket
+class streamDouble4x3cgraRocketConfig extends Config(
+  new streamDouble4x3cgra.WithstreamDouble4x3cgraAccel ++				    // add streamDouble4x3cgra
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: streamDouble4x3CgraRocket
+
+// DOC include start: streamDouble6x6CgraRocket
+class streamDouble6x6cgraRocketConfig extends Config(
+  new streamDouble6x6cgra.WithstreamDouble6x6cgraAccel ++				    // add streamDouble6x6cgra
+  new freechips.rocketchip.subsystem.WithNBigCores(1) ++
+  new chipyard.config.AbstractConfig)
+// DOC include end: streamDouble6x6CgraRocket
+
 // DOC include start: InitZeroRocketConfig
 class InitZeroRocketConfig extends Config(
   new chipyard.example.WithInitZero(0x88000000L, 0x1000L) ++   // add InitZero

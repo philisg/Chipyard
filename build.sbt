@@ -186,7 +186,7 @@ lazy val chipyard = (project in file("generators/chipyard"))
   .dependsOn(rocketchip, boom, hwacha, sifive_blocks, sifive_cache, iocell,
     sha3, // On separate line to allow for cleaner tutorial-setup patches
     dsptools, `rocket-dsp-utils`,
-    gemmini, icenet, tracegen, cva6, nvdla, sodor, cgra4x3, cgra2x2, cgra6x6, stream2x2cgra, stream4x3cgra, stream6x6cgra)
+    gemmini, icenet, tracegen, cva6, nvdla, sodor, cgra4x3, cgra2x2, cgra6x6, stream2x2cgra, stream4x3cgra, stream6x6cgra, streamDouble2x2cgra, streamDouble4x3cgra, streamDouble6x6cgra)
   .settings(libraryDependencies ++= rocketLibDeps.value)
   .settings(commonSettings)
 
@@ -265,6 +265,25 @@ lazy val cgra6x6 = (project in file("generators/cgra6x6"))
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 
+lazy val streamDouble2x2cgra = (project in file("generators/streamDouble2x2cgra"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
+lazy val streamDouble4x3cgra = (project in file("generators/streamDouble4x3cgra"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
+lazy val streamDouble6x6cgra = (project in file("generators/streamDouble6x6cgra"))
+  .dependsOn(rocketchip, chisel_testers)
+  .settings(libraryDependencies ++= rocketLibDeps.value)
+  .settings(libraryDependencies ++= chiselTestersLibDeps.value)
+  .settings(commonSettings)
+
+
 lazy val gemmini = (project in file("generators/gemmini"))
   .sourceDependency(testchipip, testchipipLib)
   .dependsOn(rocketchip, chisel_testers)
@@ -284,7 +303,7 @@ lazy val iocell = (project in file("./tools/barstools/iocell/"))
   .settings(commonSettings)
 
 lazy val tapeout = (project in file("./tools/barstools/tapeout/"))
-  .dependsOn(chisel_testers, chipyard, cgra4x3, cgra2x2, cgra6x6, stream2x2cgra, stream4x3cgra, stream6x6cgra) // must depend on chipyard to get scala resources
+  .dependsOn(chisel_testers, chipyard, cgra4x3, cgra2x2, cgra6x6, stream2x2cgra, stream4x3cgra, stream6x6cgra, streamDouble2x2cgra, streamDouble4x3cgra, streamDouble6x6cgra) // must depend on chipyard to get scala resources
   .settings(libraryDependencies ++= chiselTestersLibDeps.value)
   .settings(commonSettings)
 
