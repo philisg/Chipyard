@@ -85,7 +85,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
   val state   = Reg(init = s_idle)
 
   //CGRA control
-  val c_idle :: c_get_address :: c_fetch_data :: c_data_to_cgra :: c_get_second_address :: Nil = Enum(UInt(), 5)
+  val c_idle :: c_get_address :: Nil = Enum(UInt(), 2)
   val cgra_state  = Reg(init = c_idle)
 
   //memory handler
@@ -259,7 +259,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
       when(io.addr0 =/= last_address && address_counter =/= input_len(1)){
         address_counter := address_counter + 2
         io.mem_req_val  := true.B
-        io.mem_req_addr := input1_adress.asUInt + io.addr0.asUInt - 8
+        io.mem_req_addr := input1_adress.asUInt + io.addr0.asUInt - 4
         io.mem_req_tag  := tag
         io.mem_req_cmd  := M_XRD
         io.mem_req_size := log2Ceil(64).U
@@ -267,17 +267,6 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
         when(io.mem_req_rdy){
           last_address  := io.addr0
         }
-      }
-    }
-    is(c_get_second_address){
-      address_counter := address_counter + 1
-      io.mem_req_val  := true.B
-      io.mem_req_addr := input1_adress.asUInt + io.addr0.asUInt - 4
-      io.mem_req_tag  := tag+1
-      io.mem_req_cmd  := M_XRD
-      io.mem_req_size := log2Ceil(32).U
-      when(io.mem_req_rdy){
-        cgra_state := c_get_address
       }
     }
   }
@@ -315,7 +304,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
   when((io.from_cgra2 =/= output_data) && !done_calculating){
     sampling_en   := true.B
   }
-  when((sampling_en && io.addr0 =/= last_address && (output_counter =/= input_len(1)))){
+  when(sampling_en && io.addr0 =/= last_address && (output_counter =/= ((input_len(1)/2)+1))){
     output_counter  := output_counter + 1
     output_data     := io.from_cgra2
   }.elsewhen(sampling_en && (output_counter === ((input_len(1)/2)+1))){
