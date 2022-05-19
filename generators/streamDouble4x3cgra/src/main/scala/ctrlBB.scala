@@ -122,7 +122,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
   val last_address      = Reg(init = UInt(0,39))
   val tag               = Reg(init = Bits(0,5))
   val done_calculating  = Reg(init = Bool(false))
-  val memory_data       = Reg(init = Vec.fill(4) { 0.U(32.W) })
+  val memory_data       = Reg(init = Vec.fill(3) { 0.U(32.W) })
 
   
   //default
@@ -228,15 +228,15 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
         io.cgra_Inconfig  := cgra_config(j)(k)
         k := k + 1
       }
-      when(k === UInt(64)){
-        k := 0
-        j := j + 1
-      }
-      when(j === UInt(10) && k === UInt(8)){
+      when(j === UInt(10) && k === UInt(64)){
         state           := s_finished
         mem_s           := m_idle
         config_clock_en := false.B
         cgra_clock_en   := false.B
+      }
+      when(k === UInt(64)){
+        k := 0
+        j := j + 1
       }
     }
     is{s_finished}{
@@ -279,7 +279,6 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
   switch(mem_rec_state){
     is(receive){
       when(io.mem_resp_val){
-        // receive_counter := receive_counter + 1
         when(io.mem_resp_tag === tag){
           io.from_mem0    := io.mem_resp_data(15,0)
           memory_data(0)  := io.mem_resp_data(15,0)
@@ -292,11 +291,6 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
           memory_data(2)  := io.mem_resp_data(31,0)
         }
       }
-      // when(receive_counter === UInt(1)){
-      //   receive_counter := 0
-      //   cgra_clock_en   := true.B
-      //   tag             := tag + 2
-      // }
     }
   }
 
@@ -328,8 +322,8 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
       io.mem_req_addr := output_adress.asUInt
       io.mem_req_tag  := 10
       io.mem_req_cmd  := M_XWR
-      io.mem_req_data := output_data.asUInt << 32
-      io.mem_req_size := log2Ceil(32).U
+      io.mem_req_data := output_data.asUInt << 32 | output_data.asUInt
+      io.mem_req_size := log2Ceil(64).U
       when(io.mem_resp_val && io.mem_resp_tag === 10){
         mem_s             := m_idle
         busy              := false.B
@@ -343,7 +337,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
 
 /* 
 psuedo kode
-Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
+Få config fra CPU via RoCC
 configurere CGRA
 
 Få input og output pointer fra CPU via RoCC 

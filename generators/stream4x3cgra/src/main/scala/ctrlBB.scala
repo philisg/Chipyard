@@ -226,15 +226,15 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
         io.cgra_Inconfig  := cgra_config(j)(k)
         k := k + 1
       }
-      when(k === UInt(64)){
-        k := 0
-        j := j + 1
-      }
-      when(j === UInt(10) && k === UInt(8)){
+      when(j === UInt(10) && k === UInt(64)){
         state           := s_finished
         mem_s           := m_idle
         config_clock_en := false.B
         cgra_clock_en   := false.B
+      }
+      when(k === UInt(64)){
+        k := 0
+        j := j + 1
       }
     }
     is{s_finished}{
@@ -306,7 +306,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
       io.mem_req_tag  := 10
       io.mem_req_cmd  := M_XWR
       io.mem_req_data := output_data.asUInt << 32
-      io.mem_req_size := log2Ceil(32).U
+      io.mem_req_size := log2Ceil(64).U
       when(io.mem_resp_val && io.mem_resp_tag === 10){
         mem_s             := m_idle
         cgra_clock_en     := true.B
@@ -321,7 +321,7 @@ val r_idle :: r_eat_addr :: r_eat_len :: Nil = Enum(UInt(), 3)
 
 /* 
 psuedo kode
-Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
+Få config fra CPU via RoCC
 configurere CGRA
 
 Få input og output pointer fra CPU via RoCC 

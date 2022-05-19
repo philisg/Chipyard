@@ -252,15 +252,15 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
         io.cgra_Inconfig  := cgra_config(j)(k)
         k := k + 1
       }
-      when(k === UInt(64)){
-        k := 0
-        j := j + 1
-      }
-      when(j === UInt(29) && k === UInt(32)){
+      when(j === UInt(29) && k === UInt(64)){
         state           := s_finished
         mem_s           := m_idle
         config_clock_en := false.B
         cgra_clock_en   := false.B
+      }
+      when(k === UInt(64)){
+        k := 0
+        j := j + 1
       }
     }
     is{s_finished}{
@@ -332,7 +332,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
       io.mem_req_tag  := 10
       io.mem_req_cmd  := M_XWR
       io.mem_req_data := output_data.asUInt << 32
-      io.mem_req_size := log2Ceil(32).U
+      io.mem_req_size := log2Ceil(64).U
       when(io.mem_resp_val && io.mem_resp_tag === 10){
         mem_s             := m_idle
         cgra_clock_en     := true.B
@@ -347,7 +347,7 @@ class CtrlBBModule(implicit val p: Parameters) extends Module
 
 /* 
 psuedo kode
-Få config fra CPU via RoCC (Denne kan vi hardcode en se lenge?)
+Få config fra CPU via RoCC
 configurere CGRA
 
 Få input og output pointer fra CPU via RoCC 
